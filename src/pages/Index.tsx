@@ -719,10 +719,19 @@ const Index = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-2xl font-medium mb-4 theme-text playfair">
+              <h3
+                className="text-2xl font-medium mb-4"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
                 Our Mission
               </h3>
-              <p className="text-sm opacity-80 leading-relaxed mb-4 theme-text">
+              <p
+                className="text-sm opacity-80 leading-relaxed mb-4"
+                style={{ color: theme.colors.text }}
+              >
                 We believe in creating digital experiences that not only look
                 beautiful but solve real problems and create meaningful
                 connections between brands and their audiences.
@@ -730,8 +739,16 @@ const Index = () => {
             </div>
 
             <div className="border-l-2 border-amber-500/30 pl-4">
-              <h4 className="font-medium mb-3 theme-text">Our Services</h4>
-              <ul className="space-y-2 text-sm opacity-80 theme-text">
+              <h4
+                className="font-medium mb-3"
+                style={{ color: theme.colors.text }}
+              >
+                Our Services
+              </h4>
+              <ul
+                className="space-y-2 text-sm opacity-80"
+                style={{ color: theme.colors.text }}
+              >
                 <li>• Full-stack Web Development</li>
                 <li>• UI/UX Design & Prototyping</li>
                 <li>• Mobile App Development</li>
@@ -747,7 +764,6 @@ const Index = () => {
             </div>
           </div>
         );
-
       case "profile":
         return (
           <div className="space-y-4">
