@@ -1849,46 +1849,8 @@ const Index = () => {
           </button>
         </div>
 
-        {/* ==================== SMART EXPANSION OVERLAY ==================== */}
-        {expandedWidget && widgetPosition && (
-          <div
-            className="fixed z-60 rounded-2xl p-8 shadow-2xl transition-all duration-500 overflow-y-auto"
-            style={{
-              // Dynamic background based on widget type (memoized)
-              backgroundColor: widgetBackgroundColor,
-              border: `1px solid ${theme.colors.primary}20`,
-              // Apply stable expansion calculations
-              ...getStableExpansionStyle,
-            }}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                setExpandedWidget(null);
-                setClickedWidget(null);
-                setWidgetPosition(null);
-              }}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                style={{ color: theme.colors.text }}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            {/* Dynamic Expanded Content */}
-            {renderExpandedContent(expandedWidget)}
-          </div>
-        )}
+        {/* ==================== EXPANSION OVERLAY TEMPORARILY DISABLED ==================== */}
+        {/* Disabled to debug infinite re-render loop */}
       </div>
 
       {/* ==================== CUSTOM SCROLLBAR STYLES ==================== */}
