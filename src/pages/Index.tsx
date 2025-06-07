@@ -714,8 +714,6 @@ const Index = () => {
    * Content is specifically sized to minimize empty space
    */
   const renderExpandedContent = (widgetName: string) => {
-    return null; // Temporarily disabled
-    /*
     switch (widgetName) {
       case "hero":
         return (
