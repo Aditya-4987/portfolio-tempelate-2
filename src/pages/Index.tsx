@@ -1858,7 +1858,7 @@ const Index = () => {
               backgroundColor: widgetBackgroundColor,
               border: `1px solid ${theme.colors.primary}20`,
               // Apply stable expansion calculations
-              ...getStableExpansionStyle(),
+              ...getStableExpansionStyle,
             }}
           >
             {/* Close Button */}
