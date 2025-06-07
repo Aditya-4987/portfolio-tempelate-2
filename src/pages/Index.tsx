@@ -2204,11 +2204,11 @@ export default function Index() {
               {/* Simple arrow pointing to top-right with oscillating animation */}
               <div className="absolute top-4 right-4">
                 <div
-                  className="w-6 h-6 flex items-center justify-center transition-all duration-300"
+                  className="w-8 h-8 flex items-center justify-center transition-all duration-300"
                   style={{ color: theme.colors.primary }}
                 >
                   <svg
-                    className="w-4 h-4 group-hover:animate-[oscillate_1s_ease-in-out_infinite]"
+                    className="w-5 h-5 group-hover:animate-[oscillate_1s_ease-in-out_infinite]"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
