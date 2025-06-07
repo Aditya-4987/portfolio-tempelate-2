@@ -1837,8 +1837,25 @@ const Index = () => {
         )}
       </div>
 
-      {/* ==================== CUSTOM SCROLLBAR STYLES ==================== */}
-      <style jsx>{`
+      {/* ==================== DYNAMIC THEME STYLES ==================== */}
+      <style>{`
+        :root {
+          --theme-background: ${theme.colors.background};
+          --theme-text: ${theme.colors.text};
+          --theme-primary: ${theme.colors.primary};
+          --theme-hero: ${theme.colors.hero};
+          --theme-profile: ${theme.colors.profile};
+          --theme-about: ${theme.colors.about};
+          --theme-skills: ${theme.colors.skills};
+          --theme-location: ${theme.colors.location};
+          --theme-projects: ${theme.colors.projects};
+          --theme-contact: ${theme.colors.contact};
+        }
+
+        .theme-text { color: var(--theme-text); }
+        .theme-bg { background-color: var(--theme-background); }
+        .playfair { font-family: "Playfair Display", serif; }
+
         /* Custom scrollbar for expanded content */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
