@@ -457,56 +457,6 @@ const Index = () => {
   // ==================== HELPER FUNCTIONS ====================
 
   /**
-   * MEMOIZED WIDGET BACKGROUND COLOR - Prevents repeated calculations
-   */
-  const widgetBackgroundColor = useMemo(() => {
-    if (!expandedWidget) return theme.colors.profile;
-
-    switch (expandedWidget) {
-      case "hero":
-        return theme.colors.hero;
-      case "profile":
-        return theme.colors.profile;
-      case "about":
-        return theme.colors.about;
-      case "skills":
-        return theme.colors.skills;
-      case "location":
-        return theme.colors.location;
-      case "projects":
-        return theme.colors.projects;
-      case "contact":
-        return theme.colors.contact;
-      default:
-        return theme.colors.profile;
-    }
-  }, [expandedWidget, theme.colors]);
-
-  /**
-   * STABLE EXPANSION STYLE - Static dimensions to prevent any re-render loops
-   */
-  const getStableExpansionStyle = useMemo(() => {
-    if (!expandedWidget || !widgetPosition) {
-      return {};
-    }
-
-    // Use completely static, predictable dimensions
-    const baseStyle = {
-      position: "fixed" as const,
-      top: Math.max(80, widgetPosition.top - 30),
-      left: Math.max(20, widgetPosition.left - 30),
-      width: 580, // Fixed width
-      height: 480, // Fixed height
-      maxWidth: "calc(100vw - 40px)",
-      maxHeight: "calc(100vh - 120px)",
-      transform: "scale(1)",
-      transformOrigin: "center center",
-    };
-
-    return baseStyle;
-  }, [expandedWidget, widgetPosition?.top, widgetPosition?.left]);
-
-  /**
    * IMPROVED WIDGET INTERACTION HANDLER
    *
    * Manages hover and click interactions with enhanced stability:
@@ -1177,7 +1127,7 @@ const Index = () => {
                 style={{ color: theme.colors.text }}
               >
                 <div className="flex items-center opacity-80">
-                  <span className="mr-3">📧</span>
+                  <span className="mr-3">���</span>
                   hello@johndoe.dev
                 </div>
                 <div className="flex items-center opacity-80">
