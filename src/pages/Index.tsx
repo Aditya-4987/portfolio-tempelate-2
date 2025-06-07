@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 
 /**
  * Polished Bentolio Portfolio Website
- * Features sophisticated loading animation and overlay pop-ups
- * No layout shifts - all expansions are overlays
+ * Features in-place widget expansion with stable hover and click interactions
  */
 
 // Types for better organization
@@ -24,24 +23,17 @@ interface Project {
   featured: boolean;
 }
 
-interface PopupPosition {
-  top?: string;
-  bottom?: string;
-  left?: string;
-  right?: string;
-}
-
 const Index = () => {
   // ==================== STATE MANAGEMENT ====================
   const [progress, setProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showMain, setShowMain] = useState(false);
-  const [loadingPhase, setLoadingPhase] = useState(0); // 0: initial, 1: building, 2: finalizing
+  const [loadingPhase, setLoadingPhase] = useState(0);
 
-  // Overlay pop-up states
-  const [activePopup, setActivePopup] = useState<string | null>(null);
+  // Widget expansion states
+  const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
+  const [clickedWidget, setClickedWidget] = useState<string | null>(null);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [popupPosition, setPopupPosition] = useState<PopupPosition>({});
 
   // ==================== DATA STRUCTURES ====================
 
@@ -176,9 +168,9 @@ const Index = () => {
   // Sophisticated loading progress simulation
   useEffect(() => {
     const phases = [
-      { duration: 2000, increment: 0.5, label: "Initializing..." },
-      { duration: 1500, increment: 1.5, label: "Building interface..." },
-      { duration: 1000, increment: 3, label: "Finalizing..." },
+      { duration: 2000, increment: 0.5 },
+      { duration: 1500, increment: 1.5 },
+      { duration: 1000, increment: 3 },
     ];
 
     let currentPhase = 0;
@@ -221,49 +213,48 @@ const Index = () => {
 
   // ==================== HELPER FUNCTIONS ====================
 
-  // Handle overlay pop-up with positioning
-  const handlePopupHover = (
-    popupName: string,
-    isEntering: boolean,
-    element?: HTMLElement,
-    customPosition?: PopupPosition,
+  // Handle widget expansion with stable hover and click
+  const handleWidgetInteraction = (
+    widgetName: string,
+    action: "hover" | "leave" | "click",
   ) => {
-    if (hoverTimer) clearTimeout(hoverTimer);
-
-    if (isEntering) {
-      // Calculate position if element is provided
-      if (element && !customPosition) {
-        const rect = element.getBoundingClientRect();
-        const position: PopupPosition = {};
-
-        // Determine best position based on widget location
-        if (rect.left > window.innerWidth / 2) {
-          position.right = `${window.innerWidth - rect.left + 20}px`;
-        } else {
-          position.left = `${rect.right + 20}px`;
-        }
-
-        if (rect.top > window.innerHeight / 2) {
-          position.bottom = `${window.innerHeight - rect.bottom + 20}px`;
-        } else {
-          position.top = `${rect.top}px`;
-        }
-
-        setPopupPosition(position);
-      } else if (customPosition) {
-        setPopupPosition(customPosition);
-      }
-
-      const timer = setTimeout(() => {
-        setActivePopup(popupName);
-      }, 1000); // 1 second delay for elegance
-      setHoverTimer(timer);
-    } else {
-      const timer = setTimeout(() => {
-        setActivePopup(null);
-      }, 200);
-      setHoverTimer(timer);
+    // Clear any existing timer
+    if (hoverTimer) {
+      clearTimeout(hoverTimer);
+      setHoverTimer(null);
     }
+
+    if (action === "click") {
+      // Toggle on click
+      if (clickedWidget === widgetName) {
+        setClickedWidget(null);
+        setExpandedWidget(null);
+      } else {
+        setClickedWidget(widgetName);
+        setExpandedWidget(widgetName);
+      }
+    } else if (action === "hover") {
+      // Only expand on hover if not clicked
+      if (!clickedWidget) {
+        const timer = setTimeout(() => {
+          setExpandedWidget(widgetName);
+        }, 1000);
+        setHoverTimer(timer);
+      }
+    } else if (action === "leave") {
+      // Only collapse on leave if not clicked
+      if (!clickedWidget) {
+        const timer = setTimeout(() => {
+          setExpandedWidget(null);
+        }, 300);
+        setHoverTimer(timer);
+      }
+    }
+  };
+
+  // Check if widget is expanded
+  const isWidgetExpanded = (widgetName: string) => {
+    return expandedWidget === widgetName;
   };
 
   // Get visible skills for the main widget
@@ -293,11 +284,11 @@ const Index = () => {
     return phases[loadingPhase];
   };
 
-  // ==================== POPUP COMPONENTS ====================
+  // ==================== COMPONENT HELPERS ====================
 
   // Contact Form Component
   const ContactForm = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-4">
       <div>
         <label
           className="block text-xs font-medium mb-2 opacity-80"
@@ -521,414 +512,97 @@ const Index = () => {
 
             {/* ==================== MAIN CONTENT GRID ==================== */}
             <div className="col-span-12 grid grid-cols-12 gap-[14px] pb-[14px]">
-              {/* ==================== HERO SECTION WITH POPUP ==================== */}
+              {/* ==================== HERO SECTION WITH EXPANSION ==================== */}
               <div
-                className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(86, 84, 73)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("hero", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("hero", false)}
+                className={`col-span-12 md:col-span-8 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("hero")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(86, 84, 73)",
+                  height: isWidgetExpanded("hero") ? "500px" : "320px",
+                }}
+                onMouseEnter={() => handleWidgetInteraction("hero", "hover")}
+                onMouseLeave={() => handleWidgetInteraction("hero", "leave")}
+                onClick={() => handleWidgetInteraction("hero", "click")}
               >
+                {/* Decorative Elements */}
                 <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white/10 animate-spin"></div>
                 <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-white/5"></div>
 
-                <h1
-                  className="text-6xl md:text-8xl font-light mb-4 group-hover:scale-105 transition-transform duration-300"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  Creative
-                </h1>
-                <h1
-                  className="text-6xl md:text-8xl font-light mb-6 group-hover:scale-105 transition-transform duration-300"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  Developer
-                </h1>
-                <p
-                  className="text-lg opacity-80 max-w-md group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  Crafting digital experiences through innovative design and
-                  development
-                </p>
-
-                <svg
-                  className="absolute top-1/2 right-8 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
-                  fill="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              </div>
-
-              {/* ==================== PROFILE CARD WITH POPUP ==================== */}
-              <div
-                className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(45, 46, 40)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("profile", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("profile", false)}
-              >
-                <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl">
-                  <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-12 h-12 text-gray-600"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
-                  </div>
-                </div>
-                <h3
-                  className="text-xl font-medium mb-2"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  John Doe
-                </h3>
-                <p
-                  className="text-sm opacity-70 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  UI/UX Designer & Developer
-                </p>
-
-                <div className="flex items-center mt-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
-                  <span
-                    className="text-xs"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    Available for work
-                  </span>
-                </div>
-              </div>
-
-              {/* ==================== ABOUT SECTION WITH POPUP ==================== */}
-              <div
-                className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(35, 36, 30)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("about", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("about", false)}
-              >
-                <svg
-                  className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
-                  fill="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
-                </svg>
-
-                <h3
-                  className="text-2xl font-light mb-4"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  About Me
-                </h3>
-                <p
-                  className="text-sm leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  I'm a passionate creative developer with over 5 years of
-                  experience in crafting digital experiences. I specialize in
-                  React, Next.js, and modern web technologies.
-                </p>
-              </div>
-
-              {/* ==================== SKILLS SECTION WITH POPUP ==================== */}
-              <div
-                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(55, 56, 50)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("skills", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("skills", false)}
-              >
-                <h3
-                  className="text-xl font-light mb-4"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  Skills
-                </h3>
-
-                <div className="space-y-3">
-                  {getVisibleSkills().map((skill, index) => (
-                    <div
-                      key={skill.name}
-                      className="flex items-center text-sm transition-all duration-300 hover:translate-x-2"
-                      style={{
-                        color: "rgb(216, 207, 188)",
-                        opacity: skill.opacity,
-                      }}
-                    >
-                      <div className="w-2 h-2 rounded-full mr-3 bg-current opacity-60"></div>
-                      {skill.name}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="absolute bottom-4 left-6 right-6">
-                  <div
-                    className="text-xs opacity-60 mb-2"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    Proficiency
-                  </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full group-hover:animate-pulse"
-                      style={{ width: "92%" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ==================== LOCATION CARD WITH POPUP ==================== */}
-              <div
-                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(65, 66, 60)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("location", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("location", false)}
-              >
-                <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
-                  🌍
-                </div>
-                <h3
-                  className="text-lg font-light mb-2"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  Based in
-                </h3>
-                <p
-                  className="text-sm opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  San Francisco, CA
-                </p>
+                {/* Base Content */}
                 <div
-                  className="mt-3 text-xs opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  className={`transition-all duration-500 ${isWidgetExpanded("hero") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                 >
-                  UTC-8 (PST)
-                </div>
-
-                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-white/20 animate-pulse"></div>
-                <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-white/10"></div>
-              </div>
-
-              {/* ==================== PROJECTS SECTION WITH POPUP ==================== */}
-              <div
-                className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(75, 76, 70)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("projects", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("projects", false)}
-              >
-                <h3
-                  className="text-2xl font-light mb-4"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  Recent Work
-                </h3>
-
-                <div className="grid grid-cols-3 gap-4 h-32">
-                  {getFeaturedProjects().map((project, i) => (
-                    <div
-                      key={project.id}
-                      className="bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group/project hover:scale-105"
-                    >
-                      <div className="w-full h-8 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-2 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
-                      <div>
-                        <div
-                          className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {project.name}
-                        </div>
-                        <div
-                          className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {project.tech.slice(0, 2).join(", ")}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="absolute bottom-4 right-6">
-                  <button
-                    className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:underline"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    View All Projects →
-                  </button>
-                </div>
-              </div>
-
-              {/* ==================== CONTACT SECTION WITH POPUP ==================== */}
-              <div
-                className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(25, 26, 20)" }}
-                onMouseEnter={(e) =>
-                  handlePopupHover("contact", true, e.currentTarget)
-                }
-                onMouseLeave={() => handlePopupHover("contact", false)}
-              >
-                <svg
-                  className="absolute top-4 right-4 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
-                  fill="none"
-                  stroke="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-
-                <h3
-                  className="text-xl font-light mb-4"
-                  style={{
-                    color: "rgb(216, 207, 188)",
-                    fontFamily: "Playfair Display, serif",
-                  }}
-                >
-                  Let's Connect
-                </h3>
-
-                <div className="space-y-4">
-                  <a
-                    href="#"
-                    className="block text-sm opacity-80 hover:opacity-100 transition-all duration-300 hover:translate-x-2 group/email"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    <span className="group-hover/email:underline">
-                      hello@johndoe.dev
-                    </span>
-                  </a>
-                  <div className="flex space-x-6">
-                    {[
-                      { name: "Twitter", icon: "🐦" },
-                      { name: "GitHub", icon: "💻" },
-                      { name: "LinkedIn", icon: "💼" },
-                    ].map((social) => (
-                      <a
-                        key={social.name}
-                        href="#"
-                        className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:-translate-y-1 flex items-center space-x-1"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        <span>{social.icon}</span>
-                        <span>{social.name}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                <div
-                  className="mt-4 text-xs opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  Usually responds within 24h
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ==================== OVERLAY POPUPS ==================== */}
-        {activePopup && (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 transition-opacity duration-300"
-              onClick={() => setActivePopup(null)}
-            />
-
-            {/* Popup Container */}
-            <div
-              className="fixed z-50 max-w-md w-80 rounded-2xl p-6 shadow-2xl transition-all duration-300 transform"
-              style={{
-                backgroundColor: "rgb(35, 36, 30)",
-                border: "1px solid rgba(216, 207, 188, 0.2)",
-                ...popupPosition,
-              }}
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setActivePopup(null)}
-                className="absolute top-4 right-4 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200 flex items-center justify-center"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-
-              {/* Popup Content */}
-              {activePopup === "hero" && (
-                <div>
-                  <h3
-                    className="text-xl font-medium mb-4"
+                  <h1
+                    className="text-6xl md:text-8xl font-light mb-4 transition-transform duration-300"
                     style={{
                       color: "rgb(216, 207, 188)",
                       fontFamily: "Playfair Display, serif",
                     }}
                   >
-                    Our Mission
-                  </h3>
-                  <div
-                    className="space-y-4 text-sm"
+                    Creative
+                  </h1>
+                  <h1
+                    className="text-6xl md:text-8xl font-light mb-6 transition-transform duration-300"
+                    style={{
+                      color: "rgb(216, 207, 188)",
+                      fontFamily: "Playfair Display, serif",
+                    }}
+                  >
+                    Developer
+                  </h1>
+                  <p
+                    className="text-lg opacity-80 max-w-md transition-opacity duration-300"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    <p className="opacity-80 leading-relaxed">
-                      We believe in creating digital experiences that not only
-                      look beautiful but solve real problems and create
-                      meaningful connections between brands and their audiences.
-                    </p>
+                    Crafting digital experiences through innovative design and
+                    development
+                  </p>
+                </div>
+
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-8 transition-all duration-500 ${
+                    isWidgetExpanded("hero")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
+                  <div className="space-y-6">
+                    <div>
+                      <h3
+                        className="text-2xl font-medium mb-4"
+                        style={{
+                          color: "rgb(216, 207, 188)",
+                          fontFamily: "Playfair Display, serif",
+                        }}
+                      >
+                        Our Mission
+                      </h3>
+                      <p
+                        className="text-sm opacity-80 leading-relaxed mb-4"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        We believe in creating digital experiences that not only
+                        look beautiful but solve real problems and create
+                        meaningful connections between brands and their
+                        audiences.
+                      </p>
+                    </div>
+
                     <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Our Services</h4>
-                      <ul className="space-y-1 text-xs opacity-80">
+                      <h4
+                        className="font-medium mb-3"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Our Services
+                      </h4>
+                      <ul
+                        className="space-y-2 text-sm opacity-80"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
                         <li>• Full-stack Web Development</li>
                         <li>• UI/UX Design & Prototyping</li>
                         <li>• Mobile App Development</li>
@@ -936,19 +610,86 @@ const Index = () => {
                         <li>• Performance Optimization</li>
                       </ul>
                     </div>
-                    <div className="pt-4 border-t border-white/10">
-                      <button className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
+
+                    <div className="pt-4">
+                      <button className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
                         Start a Project
                       </button>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {activePopup === "profile" && (
-                <div>
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("hero") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
+                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+
+                <svg
+                  className="absolute top-1/2 right-8 w-6 h-6 opacity-20 transition-opacity duration-300"
+                  fill="currentColor"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+
+              {/* ==================== PROFILE CARD WITH EXPANSION ==================== */}
+              <div
+                className={`col-span-12 md:col-span-4 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("profile")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(45, 46, 40)",
+                  height: isWidgetExpanded("profile") ? "500px" : "320px",
+                }}
+                onMouseEnter={() => handleWidgetInteraction("profile", "hover")}
+                onMouseLeave={() => handleWidgetInteraction("profile", "leave")}
+                onClick={() => handleWidgetInteraction("profile", "click")}
+              >
+                {/* Base Content */}
+                <div
+                  className={`flex flex-col items-center justify-center text-center h-full transition-all duration-500 ${
+                    isWidgetExpanded("profile")
+                      ? "opacity-0 pointer-events-none"
+                      : "opacity-100"
+                  }`}
+                >
+                  <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 transition-transform duration-300 shadow-xl">
+                    <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
+                      <svg
+                        className="w-12 h-12 text-gray-600"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                    </div>
+                  </div>
                   <h3
-                    className="text-xl font-medium mb-4"
+                    className="text-xl font-medium mb-2"
                     style={{
                       color: "rgb(216, 207, 188)",
                       fontFamily: "Playfair Display, serif",
@@ -956,10 +697,33 @@ const Index = () => {
                   >
                     John Doe
                   </h3>
-                  <div
-                    className="space-y-4 text-sm"
+                  <p
+                    className="text-sm opacity-70 transition-opacity duration-300"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
+                    UI/UX Designer & Developer
+                  </p>
+
+                  <div className="flex items-center mt-4 opacity-60 transition-opacity duration-300">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
+                    <span
+                      className="text-xs"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      Available for work
+                    </span>
+                  </div>
+                </div>
+
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-6 transition-all duration-500 ${
+                    isWidgetExpanded("profile")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
+                  <div className="space-y-6">
                     <div className="text-center">
                       <div className="w-20 h-20 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
                         <div className="w-16 h-16 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
@@ -972,15 +736,31 @@ const Index = () => {
                           </svg>
                         </div>
                       </div>
-                      <div className="text-lg font-medium mb-1">John Doe</div>
-                      <div className="text-xs opacity-70 mb-3">
+                      <div
+                        className="text-lg font-medium mb-1"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        John Doe
+                      </div>
+                      <div
+                        className="text-xs opacity-70 mb-3"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
                         Senior Creative Developer
                       </div>
                     </div>
 
                     <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Achievements</h4>
-                      <ul className="space-y-1 text-xs opacity-80">
+                      <h4
+                        className="font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Achievements
+                      </h4>
+                      <ul
+                        className="space-y-1 text-xs opacity-80"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
                         <li>🏆 Awwwards Site of the Day (2023)</li>
                         <li>🎖️ CSS Design Awards Winner</li>
                         <li>📜 Google Developer Expert</li>
@@ -989,8 +769,16 @@ const Index = () => {
                     </div>
 
                     <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Certifications</h4>
-                      <ul className="space-y-1 text-xs opacity-80">
+                      <h4
+                        className="font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Certifications
+                      </h4>
+                      <ul
+                        className="space-y-1 text-xs opacity-80"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
                         <li>• AWS Solutions Architect</li>
                         <li>• Google UX Design Certificate</li>
                         <li>• React Advanced Patterns</li>
@@ -1002,73 +790,63 @@ const Index = () => {
                     </button>
                   </div>
                 </div>
-              )}
 
-              {activePopup === "location" && (
-                <div>
-                  <h3
-                    className="text-xl font-medium mb-4"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("profile") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
                     }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
                   >
-                    Location & Availability
-                  </h3>
-                  <div
-                    className="space-y-4 text-sm"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    <div className="text-center">
-                      <div className="text-4xl mb-2">🌍</div>
-                      <div className="font-medium">
-                        San Francisco, California
-                      </div>
-                      <div className="text-xs opacity-70">United States</div>
-                    </div>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-xs opacity-70 mb-1">
-                          Local Time
-                        </div>
-                        <div className="font-medium">
-                          {new Date().toLocaleTimeString("en-US", {
-                            timeZone: "America/Los_Angeles",
-                            hour12: true,
-                          })}
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div className="text-xs opacity-70 mb-1">Time Zone</div>
-                        <div className="font-medium">UTC-8</div>
-                      </div>
-                    </div>
+              {/* ==================== ABOUT SECTION WITH EXPANSION ==================== */}
+              <div
+                className={`col-span-12 md:col-span-6 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("about")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(35, 36, 30)",
+                  height: isWidgetExpanded("about") ? "400px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetInteraction("about", "hover")}
+                onMouseLeave={() => handleWidgetInteraction("about", "leave")}
+                onClick={() => handleWidgetInteraction("about", "click")}
+              >
+                <svg
+                  className="absolute top-4 right-4 w-8 h-8 opacity-20 transition-opacity duration-300"
+                  fill="currentColor"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+                </svg>
 
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Work Preferences</h4>
-                      <ul className="space-y-1 text-xs opacity-80">
-                        <li>🏠 Remote work available</li>
-                        <li>🤝 On-site meetings in SF Bay Area</li>
-                        <li>✈️ Travel for projects worldwide</li>
-                        <li>🕐 Flexible working hours</li>
-                      </ul>
-                    </div>
-
-                    <div className="text-center pt-3 border-t border-white/10">
-                      <div className="flex items-center justify-center text-xs opacity-70">
-                        <div className="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></div>
-                        Available for new projects
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activePopup === "about" && (
-                <div>
+                {/* Base Content */}
+                <div
+                  className={`transition-all duration-500 ${isWidgetExpanded("about") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                >
                   <h3
-                    className="text-xl font-medium mb-4"
+                    className="text-2xl font-light mb-4"
                     style={{
                       color: "rgb(216, 207, 188)",
                       fontFamily: "Playfair Display, serif",
@@ -1076,19 +854,54 @@ const Index = () => {
                   >
                     About Me
                   </h3>
-                  <div
-                    className="space-y-4 text-sm"
+                  <p
+                    className="text-sm leading-relaxed opacity-80 transition-opacity duration-300"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    <p className="opacity-80 leading-relaxed">
+                    I'm a passionate creative developer with over 5 years of
+                    experience in crafting digital experiences. I specialize in
+                    React, Next.js, and modern web technologies.
+                  </p>
+                </div>
+
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-6 transition-all duration-500 ${
+                    isWidgetExpanded("about")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
+                  <div className="space-y-4">
+                    <h3
+                      className="text-xl font-medium mb-4"
+                      style={{
+                        color: "rgb(216, 207, 188)",
+                        fontFamily: "Playfair Display, serif",
+                      }}
+                    >
+                      About Me
+                    </h3>
+                    <p
+                      className="text-sm opacity-80 leading-relaxed"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
                       I'm a passionate creative developer with over 5 years of
                       experience in crafting digital experiences that bridge the
                       gap between design and technology.
                     </p>
 
                     <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Experience Timeline</h4>
-                      <div className="space-y-2 text-xs opacity-80">
+                      <h4
+                        className="font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Experience Timeline
+                      </h4>
+                      <div
+                        className="space-y-2 text-xs opacity-80"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
                         <div className="flex justify-between">
                           <span>Senior Frontend Developer</span>
                           <span>2023-Present</span>
@@ -1104,39 +917,124 @@ const Index = () => {
                         <div className="text-xs opacity-60">
                           StartupXYZ - Built MVP to 100k+ users
                         </div>
-
-                        <div className="flex justify-between mt-2">
-                          <span>Frontend Developer</span>
-                          <span>2019-2021</span>
-                        </div>
-                        <div className="text-xs opacity-60">
-                          DesignStudio - Award-winning projects
-                        </div>
                       </div>
                     </div>
 
                     <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Philosophy</h4>
-                      <p className="text-xs opacity-80 leading-relaxed">
+                      <h4
+                        className="font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Philosophy
+                      </h4>
+                      <p
+                        className="text-xs opacity-80 leading-relaxed"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
                         I believe great software isn't just about code—it's
                         about understanding users, solving real problems, and
                         creating experiences that feel intuitive and delightful.
                       </p>
                     </div>
+                  </div>
+                </div>
 
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4 className="font-medium mb-2">Interests</h4>
-                      <p className="text-xs opacity-80">
-                        Photography • Minimalist Design • Open Source •
-                        Sustainability • Jazz Music
-                      </p>
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("about") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
+                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* ==================== SKILLS SECTION WITH EXPANSION ==================== */}
+              <div
+                className={`col-span-12 md:col-span-3 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("skills")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(55, 56, 50)",
+                  height: isWidgetExpanded("skills") ? "400px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetInteraction("skills", "hover")}
+                onMouseLeave={() => handleWidgetInteraction("skills", "leave")}
+                onClick={() => handleWidgetInteraction("skills", "click")}
+              >
+                {/* Base Content */}
+                <div
+                  className={`transition-all duration-500 ${isWidgetExpanded("skills") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                >
+                  <h3
+                    className="text-xl font-light mb-4"
+                    style={{
+                      color: "rgb(216, 207, 188)",
+                      fontFamily: "Playfair Display, serif",
+                    }}
+                  >
+                    Skills
+                  </h3>
+
+                  <div className="space-y-3">
+                    {getVisibleSkills().map((skill, index) => (
+                      <div
+                        key={skill.name}
+                        className="flex items-center text-sm transition-all duration-300 hover:translate-x-2"
+                        style={{
+                          color: "rgb(216, 207, 188)",
+                          opacity: skill.opacity,
+                        }}
+                      >
+                        <div className="w-2 h-2 rounded-full mr-3 bg-current opacity-60"></div>
+                        {skill.name}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="absolute bottom-4 left-6 right-6">
+                    <div
+                      className="text-xs opacity-60 mb-2"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      Proficiency
+                    </div>
+                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-300"
+                        style={{ width: "92%" }}
+                      ></div>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {activePopup === "skills" && (
-                <div>
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-6 transition-all duration-500 ${
+                    isWidgetExpanded("skills")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
                   <h3
                     className="text-xl font-medium mb-4"
                     style={{
@@ -1146,7 +1044,7 @@ const Index = () => {
                   >
                     Skills & Expertise
                   </h3>
-                  <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-3">
                     {allSkills.map((skill) => (
                       <div
                         key={skill.name}
@@ -1188,63 +1086,453 @@ const Index = () => {
                     ))}
                   </div>
                 </div>
-              )}
 
-              {activePopup === "projects" && (
-                <div>
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("skills") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
+                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* ==================== LOCATION CARD WITH EXPANSION ==================== */}
+              <div
+                className={`col-span-12 md:col-span-3 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("location")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(65, 66, 60)",
+                  height: isWidgetExpanded("location") ? "400px" : "240px",
+                }}
+                onMouseEnter={() =>
+                  handleWidgetInteraction("location", "hover")
+                }
+                onMouseLeave={() =>
+                  handleWidgetInteraction("location", "leave")
+                }
+                onClick={() => handleWidgetInteraction("location", "click")}
+              >
+                {/* Base Content */}
+                <div
+                  className={`flex flex-col justify-center text-center h-full transition-all duration-500 ${
+                    isWidgetExpanded("location")
+                      ? "opacity-0 pointer-events-none"
+                      : "opacity-100"
+                  }`}
+                >
+                  <div className="text-5xl mb-4 transition-all duration-300">
+                    🌍
+                  </div>
                   <h3
-                    className="text-xl font-medium mb-4"
+                    className="text-lg font-light mb-2"
                     style={{
                       color: "rgb(216, 207, 188)",
                       fontFamily: "Playfair Display, serif",
                     }}
                   >
-                    All Projects
+                    Based in
                   </h3>
-                  <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar">
-                    {allProjects.map((project) => (
+                  <p
+                    className="text-sm opacity-80 transition-opacity duration-300"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    San Francisco, CA
+                  </p>
+                  <div
+                    className="mt-3 text-xs opacity-60 transition-opacity duration-300"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    UTC-8 (PST)
+                  </div>
+                </div>
+
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-6 transition-all duration-500 ${
+                    isWidgetExpanded("location")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
+                  <div className="space-y-4">
+                    <h3
+                      className="text-xl font-medium mb-4"
+                      style={{
+                        color: "rgb(216, 207, 188)",
+                        fontFamily: "Playfair Display, serif",
+                      }}
+                    >
+                      Location & Availability
+                    </h3>
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🌍</div>
+                      <div
+                        className="font-medium"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        San Francisco, California
+                      </div>
+                      <div
+                        className="text-xs opacity-70"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        United States
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <div
+                          className="text-xs opacity-70 mb-1"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          Local Time
+                        </div>
+                        <div
+                          className="font-medium text-xs"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          {new Date().toLocaleTimeString("en-US", {
+                            timeZone: "America/Los_Angeles",
+                            hour12: true,
+                          })}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <div
+                          className="text-xs opacity-70 mb-1"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          Time Zone
+                        </div>
+                        <div
+                          className="font-medium text-xs"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          UTC-8
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-l-2 border-amber-500/30 pl-4">
+                      <h4
+                        className="font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Work Preferences
+                      </h4>
+                      <ul
+                        className="space-y-1 text-xs opacity-80"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        <li>🏠 Remote work available</li>
+                        <li>🤝 On-site meetings in SF Bay Area</li>
+                        <li>✈️ Travel for projects worldwide</li>
+                        <li>🕐 Flexible working hours</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("location") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
+                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Decorative Elements */}
+                <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-white/20 animate-pulse"></div>
+                <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-white/10"></div>
+              </div>
+
+              {/* ==================== PROJECTS SECTION WITH EXPANSION ==================== */}
+              <div
+                className={`col-span-12 md:col-span-8 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("projects")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(75, 76, 70)",
+                  height: isWidgetExpanded("projects") ? "500px" : "240px",
+                }}
+                onMouseEnter={() =>
+                  handleWidgetInteraction("projects", "hover")
+                }
+                onMouseLeave={() =>
+                  handleWidgetInteraction("projects", "leave")
+                }
+                onClick={() => handleWidgetInteraction("projects", "click")}
+              >
+                {/* Base Content */}
+                <div
+                  className={`transition-all duration-500 ${isWidgetExpanded("projects") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                >
+                  <h3
+                    className="text-2xl font-light mb-4"
+                    style={{
+                      color: "rgb(216, 207, 188)",
+                      fontFamily: "Playfair Display, serif",
+                    }}
+                  >
+                    Recent Work
+                  </h3>
+
+                  <div className="grid grid-cols-3 gap-4 h-32">
+                    {getFeaturedProjects().map((project, i) => (
                       <div
                         key={project.id}
-                        className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors duration-300"
+                        className="bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group/project hover:scale-105"
                       >
-                        <div className="w-full h-16 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-3"></div>
-                        <h4
-                          className="text-sm font-medium mb-2"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {project.name}
-                        </h4>
-                        <p
-                          className="text-xs opacity-70 mb-3 leading-relaxed"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {project.tech.map((tech) => (
-                            <span
-                              key={tech}
-                              className="text-xs px-2 py-1 bg-white/10 rounded"
-                              style={{ color: "rgb(216, 207, 188)" }}
-                            >
-                              {tech}
-                            </span>
-                          ))}
+                        <div className="w-full h-8 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-2 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
+                        <div>
+                          <div
+                            className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {project.name}
+                          </div>
+                          <div
+                            className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {project.tech.slice(0, 2).join(", ")}
+                          </div>
                         </div>
-                        <button
-                          className="w-full py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-xs font-medium rounded hover:from-amber-500/40 hover:to-amber-600/40 transition-all duration-300"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          Visit Project →
-                        </button>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
 
-              {activePopup === "contact" && (
-                <div>
+                  <div className="absolute bottom-4 right-6">
+                    <button
+                      className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:underline"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      View All Projects →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-6 transition-all duration-500 ${
+                    isWidgetExpanded("projects")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
+                  <div className="space-y-4">
+                    <h3
+                      className="text-xl font-medium mb-4"
+                      style={{
+                        color: "rgb(216, 207, 188)",
+                        fontFamily: "Playfair Display, serif",
+                      }}
+                    >
+                      All Projects
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {allProjects.map((project) => (
+                        <div
+                          key={project.id}
+                          className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors duration-300"
+                        >
+                          <div className="w-full h-16 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-3"></div>
+                          <h4
+                            className="text-sm font-medium mb-2"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {project.name}
+                          </h4>
+                          <p
+                            className="text-xs opacity-70 mb-3 leading-relaxed"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {project.description.slice(0, 80)}...
+                          </p>
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {project.tech.slice(0, 3).map((tech) => (
+                              <span
+                                key={tech}
+                                className="text-xs px-2 py-1 bg-white/10 rounded"
+                                style={{ color: "rgb(216, 207, 188)" }}
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                          <button
+                            className="w-full py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-xs font-medium rounded hover:from-amber-500/40 hover:to-amber-600/40 transition-all duration-300"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            Visit Project →
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("projects") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
+                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* ==================== CONTACT SECTION WITH EXPANSION ==================== */}
+              <div
+                className={`col-span-12 md:col-span-4 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                  isWidgetExpanded("contact")
+                    ? "z-50 transform scale-110 shadow-2xl"
+                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2 z-10"
+                }`}
+                style={{
+                  backgroundColor: "rgb(25, 26, 20)",
+                  height: isWidgetExpanded("contact") ? "500px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetInteraction("contact", "hover")}
+                onMouseLeave={() => handleWidgetInteraction("contact", "leave")}
+                onClick={() => handleWidgetInteraction("contact", "click")}
+              >
+                <svg
+                  className="absolute top-4 right-4 w-6 h-6 opacity-20 transition-opacity duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+
+                {/* Base Content */}
+                <div
+                  className={`flex flex-col justify-center h-full transition-all duration-500 ${
+                    isWidgetExpanded("contact")
+                      ? "opacity-0 pointer-events-none"
+                      : "opacity-100"
+                  }`}
+                >
+                  <h3
+                    className="text-xl font-light mb-4"
+                    style={{
+                      color: "rgb(216, 207, 188)",
+                      fontFamily: "Playfair Display, serif",
+                    }}
+                  >
+                    Let's Connect
+                  </h3>
+
+                  <div className="space-y-4">
+                    <a
+                      href="#"
+                      className="block text-sm opacity-80 hover:opacity-100 transition-all duration-300 hover:translate-x-2 group/email"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <span className="group-hover/email:underline">
+                        hello@johndoe.dev
+                      </span>
+                    </a>
+                    <div className="flex space-x-6">
+                      {[
+                        { name: "Twitter", icon: "🐦" },
+                        { name: "GitHub", icon: "💻" },
+                        { name: "LinkedIn", icon: "💼" },
+                      ].map((social) => (
+                        <a
+                          key={social.name}
+                          href="#"
+                          className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:-translate-y-1 flex items-center space-x-1"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          <span>{social.icon}</span>
+                          <span>{social.name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div
+                    className="mt-4 text-xs opacity-50 transition-opacity duration-300"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    Usually responds within 24h
+                  </div>
+                </div>
+
+                {/* Expanded Content */}
+                <div
+                  className={`absolute inset-6 transition-all duration-500 ${
+                    isWidgetExpanded("contact")
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 pointer-events-none"
+                  } overflow-y-auto custom-scrollbar`}
+                >
                   <h3
                     className="text-xl font-medium mb-4"
                     style={{
@@ -1286,10 +1574,36 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
-              )}
+
+                {/* Close button for expanded state */}
+                {isWidgetExpanded("contact") && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedWidget(null);
+                      setClickedWidget(null);
+                    }}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
       {/* ==================== CUSTOM STYLES ==================== */}
