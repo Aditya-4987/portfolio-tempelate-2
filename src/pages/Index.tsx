@@ -455,7 +455,7 @@ const Index = () => {
   // ==================== HELPER FUNCTIONS ====================
 
   /**
-   * SMART CONTENT-AWARE EXPANSION CALCULATOR
+   * INTELLIGENT EXPANSION CALCULATION
    *
    * Calculates optimal expansion size based on:
    * - Content requirements (no empty space)
