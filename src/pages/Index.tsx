@@ -568,6 +568,32 @@ const Index = () => {
   const [expansionStyle, setExpansionStyle] = useState<React.CSSProperties>({});
 
   /**
+   * MEMOIZED WIDGET BACKGROUND COLOR - Prevents repeated calculations
+   */
+  const widgetBackgroundColor = useMemo(() => {
+    if (!expandedWidget) return theme.colors.profile;
+
+    switch (expandedWidget) {
+      case "hero":
+        return theme.colors.hero;
+      case "profile":
+        return theme.colors.profile;
+      case "about":
+        return theme.colors.about;
+      case "skills":
+        return theme.colors.skills;
+      case "location":
+        return theme.colors.location;
+      case "projects":
+        return theme.colors.projects;
+      case "contact":
+        return theme.colors.contact;
+      default:
+        return theme.colors.profile;
+    }
+  }, [expandedWidget, theme.colors]);
+
+  /**
    * CALCULATE EXPANSION STYLE - Runs in useEffect to avoid render loop
    */
   useEffect(() => {
