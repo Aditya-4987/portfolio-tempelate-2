@@ -1966,8 +1966,8 @@ const Index = () => {
               // Dynamic background based on widget type (memoized)
               backgroundColor: widgetBackgroundColor,
               border: `1px solid ${theme.colors.primary}20`,
-              // Apply memoized smart growth calculations
-              ...expansionStyle,
+              // Apply stable expansion calculations
+              ...getStableExpansionStyle(),
             }}
           >
             {/* Close Button */}
