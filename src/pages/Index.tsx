@@ -1312,85 +1312,269 @@ export default function Index() {
 
       case "contact":
         return (
-          <div className="space-y-6">
-            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
-              Get In Touch
-            </h3>
-            <p className="text-base mb-6" style={textStyle}>
-              Ready to bring your ideas to life? Let's discuss your next project
-              and create something amazing together.
-            </p>
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
+                Get In Touch
+              </h3>
+              <p className="text-base mb-6" style={textStyle}>
+                Ready to bring your ideas to life? Let's discuss your next
+                project and create something amazing together.
+              </p>
+            </div>
 
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    className="block text-sm font-medium mb-2"
-                    style={textStyle}
-                  >
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Contact Form */}
+              <div className="space-y-6">
+                <h4 className="text-lg font-semibold" style={headingStyle}>
+                  Send a Message
+                </h4>
+
+                <form className="space-y-4">
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={textStyle}
+                    >
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
+                      style={{
+                        backgroundColor: theme.colors.surface,
+                        borderColor: theme.colors.surfaceElevated,
+                        color: theme.colors.text,
+                      }}
+                      placeholder="Your name"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={textStyle}
+                    >
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
+                      style={{
+                        backgroundColor: theme.colors.surface,
+                        borderColor: theme.colors.surfaceElevated,
+                        color: theme.colors.text,
+                      }}
+                      placeholder="your@email.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={textStyle}
+                    >
+                      Project Type
+                    </label>
+                    <select
+                      className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
+                      style={{
+                        backgroundColor: theme.colors.surface,
+                        borderColor: theme.colors.surfaceElevated,
+                        color: theme.colors.text,
+                      }}
+                    >
+                      <option>Web Development</option>
+                      <option>Mobile App</option>
+                      <option>UI/UX Design</option>
+                      <option>Consulting</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={textStyle}
+                    >
+                      Message
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none resize-none"
+                      style={{
+                        backgroundColor: theme.colors.surface,
+                        borderColor: theme.colors.surfaceElevated,
+                        color: theme.colors.text,
+                      }}
+                      placeholder="Tell me about your project vision, timeline, and goals..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
                     style={{
-                      backgroundColor: theme.colors.surface,
-                      borderColor: theme.colors.surfaceElevated,
-                      color: theme.colors.text,
+                      background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                      color: theme.colors.background,
                     }}
-                    placeholder="Your name"
-                  />
-                </div>
-                <div>
-                  <label
-                    className="block text-sm font-medium mb-2"
-                    style={textStyle}
                   >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
-                    style={{
-                      backgroundColor: theme.colors.surface,
-                      borderColor: theme.colors.surfaceElevated,
-                      color: theme.colors.text,
-                    }}
-                    placeholder="your@email.com"
-                  />
-                </div>
+                    Send Message
+                  </button>
+                </form>
               </div>
 
-              <div>
-                <label
-                  className="block text-sm font-medium mb-2"
-                  style={textStyle}
-                >
-                  Message
-                </label>
-                <textarea
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none resize-none"
+              {/* Contact Information & Social Media */}
+              <div className="space-y-6">
+                <div>
+                  <h4
+                    className="text-lg font-semibold mb-4"
+                    style={headingStyle}
+                  >
+                    Contact Information
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: theme.colors.surface }}
+                      >
+                        <span className="text-lg">📧</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm" style={textStyle}>
+                          Email
+                        </div>
+                        <div className="text-sm" style={secondaryTextStyle}>
+                          hello@bentolio.dev
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: theme.colors.surface }}
+                      >
+                        <span className="text-lg">📱</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm" style={textStyle}>
+                          Phone
+                        </div>
+                        <div className="text-sm" style={secondaryTextStyle}>
+                          +1 (555) 123-4567
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: theme.colors.surface }}
+                      >
+                        <span className="text-lg">💬</span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm" style={textStyle}>
+                          Discord
+                        </div>
+                        <div className="text-sm" style={secondaryTextStyle}>
+                          bentolio#1234
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4
+                    className="text-lg font-semibold mb-4"
+                    style={headingStyle}
+                  >
+                    Connect with Me
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <a
+                      href="https://linkedin.com/in/bentolio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 hover:scale-105"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">in</span>
+                      </div>
+                      <span className="text-sm font-medium" style={textStyle}>
+                        LinkedIn
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://github.com/bentolio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 hover:scale-105"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div className="w-6 h-6 rounded bg-gray-800 flex items-center justify-center">
+                        <span className="text-white text-xs">⚡</span>
+                      </div>
+                      <span className="text-sm font-medium" style={textStyle}>
+                        GitHub
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://twitter.com/bentolio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 hover:scale-105"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div className="w-6 h-6 rounded bg-sky-500 flex items-center justify-center">
+                        <span className="text-white text-xs">𝕏</span>
+                      </div>
+                      <span className="text-sm font-medium" style={textStyle}>
+                        Twitter
+                      </span>
+                    </a>
+
+                    <a
+                      href="https://dribbble.com/bentolio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 hover:scale-105"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div className="w-6 h-6 rounded bg-pink-500 flex items-center justify-center">
+                        <span className="text-white text-xs">●</span>
+                      </div>
+                      <span className="text-sm font-medium" style={textStyle}>
+                        Dribbble
+                      </span>
+                    </a>
+                  </div>
+                </div>
+
+                <div
+                  className="p-4 rounded-lg border-l-4"
                   style={{
                     backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.surfaceElevated,
-                    color: theme.colors.text,
+                    borderLeftColor: theme.colors.primary,
                   }}
-                  placeholder="Tell me about your project..."
-                />
+                >
+                  <div className="text-sm font-medium mb-2" style={textStyle}>
+                    Response Time
+                  </div>
+                  <div className="text-xs" style={secondaryTextStyle}>
+                    I typically respond to messages within 24 hours during
+                    business days. For urgent matters, feel free to reach out on
+                    LinkedIn or Twitter.
+                  </div>
+                </div>
               </div>
-
-              <button
-                type="submit"
-                className="w-full py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
-                style={{
-                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-                  color: theme.colors.background,
-                }}
-              >
-                Send Message
-              </button>
-            </form>
+            </div>
           </div>
         );
 
