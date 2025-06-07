@@ -2228,7 +2228,7 @@ export default function Index() {
                 <div className="flex items-center space-x-2 text-xs">
                   <span>📧</span>
                   <span style={{ color: theme.colors.textSecondary }}>
-                    hello@johndoe.dev
+                    hello@bentolio.dev
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
@@ -2239,19 +2239,19 @@ export default function Index() {
                 </div>
               </div>
 
-              <div className="absolute bottom-4 right-4">
+              {/* Directional arrow with hover animation */}
+              <div className="absolute top-4 right-4">
                 <div
-                  className="w-8 h-6 border-2 rounded-sm relative transition-colors duration-300"
-                  style={{ borderColor: theme.colors.primary }}
+                  className="w-6 h-6 flex items-center justify-center transition-all duration-300 group-hover:animate-bounce"
+                  style={{ color: theme.colors.primary }}
                 >
-                  <div
-                    className="absolute inset-1 border"
-                    style={{ borderColor: theme.colors.primary }}
-                  ></div>
-                  <div
-                    className="absolute top-1 left-1 w-2 h-1 rounded"
-                    style={{ backgroundColor: theme.colors.accent }}
-                  ></div>
+                  <svg
+                    className="w-4 h-4 transform rotate-45"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M7 17l9.2-9.2M17 17V7H7" />
+                  </svg>
                 </div>
               </div>
             </div>
