@@ -566,7 +566,13 @@ const Index = () => {
    */
   const expansionStyle = useMemo(() => {
     return getSmartGrowthStyle();
-  }, [expandedWidget, widgetPosition]);
+  }, [
+    expandedWidget,
+    widgetPosition?.top,
+    widgetPosition?.left,
+    widgetPosition?.width,
+    widgetPosition?.height,
+  ]);
 
   /**
    * IMPROVED WIDGET INTERACTION HANDLER
