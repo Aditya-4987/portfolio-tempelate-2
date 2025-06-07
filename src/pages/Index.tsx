@@ -4,11 +4,11 @@ import { useEffect, useState, useRef, useMemo } from "react";
  * BENTOLIO PORTFOLIO WEBSITE - ENHANCED AESTHETIC VERSION
  *
  * A sophisticated portfolio website featuring:
- * - Elegant typography with premium font combinations
- * - Complex multi-layered loading animation with particle effects
- * - Enhanced color themes with perfect contrast ratios
- * - Sophisticated micro-interactions and animations
- * - Premium aesthetic design language
+ * - Elegant theme-aware loading animation with morphing elements
+ * - Smooth page transitions with fade and scale effects
+ * - Redesigned theme selector with elegant card layout
+ * - Enhanced hero widget with refined aesthetics
+ * - Premium design language throughout
  */
 
 // ==================== TYPE DEFINITIONS ====================
@@ -40,6 +40,7 @@ interface WidgetPosition {
 interface ColorTheme {
   id: string;
   name: string;
+  description: string;
   colors: {
     background: string;
     text: string;
@@ -64,6 +65,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "charcoal",
     name: "Charcoal Elegance",
+    description: "Sophisticated dark theme with warm accents",
     colors: {
       background: "rgb(12, 13, 15)",
       text: "rgb(248, 250, 252)",
@@ -84,6 +86,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "ocean",
     name: "Ocean Depth",
+    description: "Deep blue tones inspired by ocean depths",
     colors: {
       background: "rgb(8, 19, 35)",
       text: "rgb(248, 250, 252)",
@@ -104,6 +107,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "forest",
     name: "Forest Canopy",
+    description: "Rich greens reminiscent of forest canopies",
     colors: {
       background: "rgb(15, 33, 20)",
       text: "rgb(248, 250, 248)",
@@ -124,6 +128,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "sunset",
     name: "Sunset Glow",
+    description: "Warm oranges and reds of golden hour",
     colors: {
       background: "rgb(45, 25, 15)",
       text: "rgb(254, 252, 248)",
@@ -144,6 +149,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "midnight",
     name: "Midnight Aurora",
+    description: "Mystical purples with aurora-like accents",
     colors: {
       background: "rgb(20, 15, 35)",
       text: "rgb(250, 248, 255)",
@@ -164,6 +170,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "rose",
     name: "Rose Gold",
+    description: "Luxurious rose gold with warm undertones",
     colors: {
       background: "rgb(35, 20, 25)",
       text: "rgb(254, 248, 250)",
@@ -184,6 +191,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "emerald",
     name: "Emerald Depths",
+    description: "Deep emerald with sophisticated jewel tones",
     colors: {
       background: "rgb(18, 35, 28)",
       text: "rgb(248, 254, 252)",
@@ -204,6 +212,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "copper",
     name: "Copper Patina",
+    description: "Warm metallic copper with earthy patina",
     colors: {
       background: "rgb(30, 28, 20)",
       text: "rgb(252, 248, 242)",
@@ -224,6 +233,7 @@ const colorThemes: ColorTheme[] = [
   {
     id: "cosmic",
     name: "Cosmic Nebula",
+    description: "Deep space purples with nebula-inspired hues",
     colors: {
       background: "rgb(15, 15, 30)",
       text: "rgb(250, 250, 255)",
@@ -260,8 +270,8 @@ export default function Index() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [skillAnimations, setSkillAnimations] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [particles, setParticles] = useState<
-    Array<{ id: number; x: number; y: number; opacity: number; scale: number }>
+  const [loadingElements, setLoadingElements] = useState<
+    Array<{ id: number; scale: number; opacity: number; rotate: number }>
   >([]);
 
   const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -397,55 +407,75 @@ export default function Index() {
     },
   ];
 
-  // ==================== SOPHISTICATED LOADING ANIMATION ====================
+  // ==================== ELEGANT LOADING ANIMATION ====================
 
   useEffect(() => {
     const phases = [
-      { duration: 3000, increment: 0.4, name: "Initializing Core Systems" },
-      { duration: 2500, increment: 1.2, name: "Loading Creative Assets" },
-      { duration: 2000, increment: 2.8, name: "Optimizing Experience" },
-      { duration: 1500, increment: 4.2, name: "Finalizing Interface" },
+      {
+        duration: 3000,
+        increment: 0.6,
+        name: "Initializing Experience",
+        subtitle: "Preparing the canvas",
+      },
+      {
+        duration: 2500,
+        increment: 1.4,
+        name: "Loading Aesthetics",
+        subtitle: "Crafting visual harmony",
+      },
+      {
+        duration: 2000,
+        increment: 2.6,
+        name: "Optimizing Interface",
+        subtitle: "Fine-tuning interactions",
+      },
+      {
+        duration: 1500,
+        increment: 3.8,
+        name: "Finalizing Elegance",
+        subtitle: "Polishing perfection",
+      },
     ];
 
     let currentPhase = 0;
     let phaseProgress = 0;
 
-    const initialParticles = Array.from({ length: 12 }, (_, i) => ({
+    // Initialize elegant loading elements
+    const initialElements = Array.from({ length: 6 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      opacity: Math.random() * 0.6 + 0.2,
-      scale: Math.random() * 0.8 + 0.4,
+      scale: 0.8 + Math.random() * 0.4,
+      opacity: 0.6 + Math.random() * 0.4,
+      rotate: Math.random() * 360,
     }));
-    setParticles(initialParticles);
+    setLoadingElements(initialElements);
 
     const timer = setInterval(() => {
       const phase = phases[currentPhase];
-      phaseProgress += phase.increment + Math.random() * 0.8;
+      phaseProgress += phase.increment + Math.random() * 0.6;
 
-      if (currentPhase === 0 && phaseProgress >= 20) {
+      if (currentPhase === 0 && phaseProgress >= 22) {
         setLoadingPhase(1);
         currentPhase = 1;
-        phaseProgress = 20;
-      } else if (currentPhase === 1 && phaseProgress >= 45) {
+        phaseProgress = 22;
+      } else if (currentPhase === 1 && phaseProgress >= 48) {
         setLoadingPhase(2);
         currentPhase = 2;
-        phaseProgress = 45;
-      } else if (currentPhase === 2 && phaseProgress >= 75) {
+        phaseProgress = 48;
+      } else if (currentPhase === 2 && phaseProgress >= 78) {
         setLoadingPhase(3);
         currentPhase = 3;
-        phaseProgress = 75;
+        phaseProgress = 78;
       }
 
       setProgress(Math.min(phaseProgress, 100));
 
-      setParticles((prev) =>
-        prev.map((particle) => ({
-          ...particle,
-          x: (particle.x + 0.3) % 100,
-          y: particle.y + Math.sin(Date.now() * 0.001 + particle.id) * 0.1,
-          opacity: 0.3 + Math.sin(Date.now() * 0.002 + particle.id) * 0.3,
-          scale: 0.4 + Math.sin(Date.now() * 0.0015 + particle.id) * 0.4,
+      // Animate loading elements
+      setLoadingElements((prev) =>
+        prev.map((element) => ({
+          ...element,
+          scale: 0.6 + 0.4 * Math.sin(Date.now() * 0.002 + element.id),
+          opacity: 0.4 + 0.4 * Math.sin(Date.now() * 0.003 + element.id),
+          rotate: element.rotate + 0.5,
         })),
       );
 
@@ -453,10 +483,10 @@ export default function Index() {
         clearInterval(timer);
         setTimeout(() => {
           setIsLoaded(true);
-          setTimeout(() => setShowMain(true), 1200);
-        }, 800);
+          setTimeout(() => setShowMain(true), 1000);
+        }, 600);
       }
-    }, 60);
+    }, 80);
 
     return () => clearInterval(timer);
   }, []);
@@ -912,16 +942,10 @@ export default function Index() {
 
   const getLoadingContent = () => {
     const phases = [
-      {
-        text: "Initializing Core Systems",
-        subtitle: "Setting up the foundation",
-      },
-      {
-        text: "Loading Creative Assets",
-        subtitle: "Preparing visual elements",
-      },
-      { text: "Optimizing Experience", subtitle: "Fine-tuning performance" },
-      { text: "Finalizing Interface", subtitle: "Polishing interactions" },
+      { text: "Initializing Experience", subtitle: "Preparing the canvas" },
+      { text: "Loading Aesthetics", subtitle: "Crafting visual harmony" },
+      { text: "Optimizing Interface", subtitle: "Fine-tuning interactions" },
+      { text: "Finalizing Elegance", subtitle: "Polishing perfection" },
     ];
 
     const phase = phases[loadingPhase] || phases[0];
@@ -932,89 +956,104 @@ export default function Index() {
     };
   };
 
-  // ==================== LOADING SCREEN ====================
+  // ==================== ELEGANT LOADING SCREEN ====================
 
   if (!isLoaded) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
+        className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden transition-all duration-1000"
         style={{
-          background: `radial-gradient(ellipse at center, ${theme.colors.background}cc 0%, ${theme.colors.background} 100%)`,
+          background: `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.surface}30 100%)`,
         }}
       >
+        {/* Elegant floating elements */}
         <div className="absolute inset-0 overflow-hidden">
-          {particles.map((particle) => (
+          {loadingElements.map((element) => (
             <div
-              key={particle.id}
-              className="absolute w-1 h-1 rounded-full animate-pulse"
+              key={element.id}
+              className="absolute"
               style={{
-                left: `${particle.x}%`,
-                top: `${particle.y}%`,
-                opacity: particle.opacity,
-                transform: `scale(${particle.scale})`,
-                backgroundColor: theme.colors.primary,
-                boxShadow: `0 0 ${particle.scale * 10}px ${theme.colors.primary}40`,
-                transition: "all 0.3s ease-out",
+                left: `${20 + element.id * 15}%`,
+                top: `${25 + element.id * 8}%`,
+                transform: `scale(${element.scale}) rotate(${element.rotate}deg)`,
+                opacity: element.opacity,
+                transition: "all 0.5s ease-out",
               }}
-            />
-          ))}
-        </div>
-
-        <div className="absolute inset-0 opacity-20">
-          <div
-            className="absolute top-1/4 left-1/4 w-32 h-32 border-2 rounded-full animate-spin"
-            style={{
-              borderColor: theme.colors.primary,
-              borderTopColor: "transparent",
-              animationDuration: "8s",
-            }}
-          />
-          <div
-            className="absolute bottom-1/4 right-1/4 w-24 h-24 border-2 rounded-full animate-spin"
-            style={{
-              borderColor: theme.colors.accent,
-              borderTopColor: "transparent",
-              animationDuration: "12s",
-              animationDirection: "reverse",
-            }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-dashed rounded-full animate-pulse"
-            style={{
-              borderColor: theme.colors.primary,
-              animationDuration: "4s",
-            }}
-          />
-        </div>
-
-        <div className="z-10 text-center space-y-8 max-w-md mx-auto px-6">
-          <div className="space-y-6">
-            <div className="relative mx-auto w-24 h-24">
+            >
               <div
-                className="absolute inset-0 border-4 border-t-transparent rounded-full animate-spin"
+                className="w-16 h-16 rounded-full border-2"
                 style={{
-                  borderColor: theme.colors.primary,
-                  borderTopColor: "transparent",
-                }}
-              />
-              <div
-                className="absolute inset-2 border-2 border-b-transparent rounded-full animate-spin"
-                style={{
-                  borderColor: theme.colors.accent,
-                  borderBottomColor: "transparent",
-                  animationDirection: "reverse",
-                  animationDuration: "2s",
+                  borderColor: `${theme.colors.primary}40`,
+                  background: `radial-gradient(circle at center, ${theme.colors.primary}10, transparent)`,
                 }}
               />
             </div>
+          ))}
+        </div>
 
-            <div className="space-y-3">
+        {/* Elegant geometric background */}
+        <div className="absolute inset-0 opacity-30">
+          <div
+            className="absolute top-1/3 left-1/3 w-40 h-40 rounded-full border"
+            style={{
+              borderColor: `${theme.colors.primary}20`,
+              animation: "spin 20s linear infinite",
+            }}
+          />
+          <div
+            className="absolute bottom-1/3 right-1/3 w-32 h-32 rounded-full border"
+            style={{
+              borderColor: `${theme.colors.accent}20`,
+              animation: "spin 15s linear infinite reverse",
+            }}
+          />
+        </div>
+
+        {/* Main content with elegant typography */}
+        <div className="z-10 text-center space-y-10 max-w-lg mx-auto px-6">
+          <div className="space-y-8">
+            {/* Sophisticated logo area */}
+            <div className="relative">
+              <div
+                className="w-20 h-20 mx-auto mb-6 rounded-full border-4 flex items-center justify-center relative overflow-hidden"
+                style={{
+                  borderColor: theme.colors.primary,
+                  background: `radial-gradient(circle at center, ${theme.colors.primary}10, transparent)`,
+                }}
+              >
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: `conic-gradient(from ${progress * 3.6}deg, ${theme.colors.primary}, ${theme.colors.accent}, ${theme.colors.primary})`,
+                    padding: "4px",
+                    animation: "spin 3s linear infinite",
+                  }}
+                >
+                  <div
+                    className="w-full h-full rounded-full"
+                    style={{ backgroundColor: theme.colors.background }}
+                  />
+                </div>
+                <div
+                  className="relative z-10 text-xl font-bold"
+                  style={{
+                    color: theme.colors.primary,
+                    fontFamily: "Crimson Pro, serif",
+                  }}
+                >
+                  B
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced brand typography */}
+            <div className="space-y-4">
               <h1
                 className="text-5xl font-bold tracking-wider"
                 style={{
                   color: theme.colors.text,
                   fontFamily: "Crimson Pro, serif",
-                  textShadow: `0 0 30px ${theme.colors.primary}40`,
+                  textShadow: `0 0 40px ${theme.colors.primary}30`,
                 }}
               >
                 Bentolio
@@ -1036,20 +1075,21 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          {/* Enhanced progress section */}
+          <div className="space-y-4">
             <div
-              className="w-full h-1 rounded-full overflow-hidden"
-              style={{ backgroundColor: `${theme.colors.surface}80` }}
+              className="w-full h-2 rounded-full overflow-hidden"
+              style={{ backgroundColor: `${theme.colors.surface}60` }}
             >
               <div
-                className="h-full transition-all duration-500 ease-out rounded-full relative overflow-hidden"
+                className="h-full transition-all duration-700 ease-out rounded-full relative overflow-hidden"
                 style={{
                   width: `${progress}%`,
                   background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.accent})`,
                   boxShadow: `0 0 20px ${theme.colors.primary}60`,
                 }}
               >
-                <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
+                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
               </div>
             </div>
 
@@ -1058,7 +1098,7 @@ export default function Index() {
                 {progress.toFixed(1)}% Complete
               </span>
               <span style={{ color: theme.colors.primary }}>
-                ∞ Crafting Excellence
+                Crafting Excellence
               </span>
             </div>
           </div>
@@ -1067,33 +1107,33 @@ export default function Index() {
     );
   }
 
+  // ==================== ELEGANT TRANSITION SCREEN ====================
+
   if (!showMain) {
     return (
       <div
         className="min-h-screen flex items-center justify-center relative overflow-hidden"
         style={{
-          background: `radial-gradient(ellipse at center, ${theme.colors.background}dd 0%, ${theme.colors.background} 100%)`,
+          background: `linear-gradient(135deg, ${theme.colors.background} 0%, ${theme.colors.surface}30 100%)`,
         }}
       >
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-6 animate-fadeInScale">
           <div
-            className="text-7xl font-bold tracking-wider animate-fadeIn"
+            className="text-7xl font-bold tracking-wider"
             style={{
               color: theme.colors.text,
               fontFamily: "Crimson Pro, serif",
-              textShadow: `0 0 50px ${theme.colors.primary}40`,
-              animation: "fadeIn 1.5s ease-in-out",
+              textShadow: `0 0 60px ${theme.colors.primary}40`,
+              animation: "fadeInScale 1.5s ease-in-out",
             }}
           >
             Welcome
           </div>
           <div
-            className="text-xl tracking-wide animate-fadeIn"
+            className="text-xl tracking-wide"
             style={{
               color: theme.colors.primary,
-              animationDelay: "0.5s",
-              opacity: 0,
-              animation: "fadeIn 1s ease-in-out 0.5s forwards",
+              animation: "fadeInScale 1s ease-in-out 0.5s both",
             }}
           >
             to the experience
@@ -1103,8 +1143,11 @@ export default function Index() {
     );
   }
 
+  // ==================== MAIN CONTENT ====================
+
   return (
     <>
+      {/* Header */}
       <header
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b"
         style={{
@@ -1183,6 +1226,7 @@ export default function Index() {
         )}
       </header>
 
+      {/* Main content */}
       <main
         className="min-h-screen pt-24 pb-16 px-6 transition-colors duration-500"
         style={{ backgroundColor: theme.colors.background }}
@@ -1196,49 +1240,55 @@ export default function Index() {
               style={{ backgroundColor: theme.colors.hero }}
               onClick={() => handleWidgetClick("hero")}
             >
+              {/* Simple decorative circle */}
               <div
-                className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 opacity-30 animate-spin group-hover:opacity-50 transition-opacity duration-300"
-                style={{
-                  borderColor: theme.colors.primary,
-                  borderTopColor: "transparent",
-                }}
-              ></div>
-              <div
-                className="absolute bottom-4 left-4 w-16 h-16 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"
-                style={{ backgroundColor: theme.colors.accent }}
+                className="absolute top-6 right-6 w-16 h-16 rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-300"
+                style={{ backgroundColor: theme.colors.primary }}
               ></div>
 
-              <h1
-                className="text-6xl font-bold mb-4 transition-colors duration-300"
-                style={{
-                  color: theme.colors.text,
-                  fontFamily: "Crimson Pro, serif",
-                  lineHeight: "1.1",
-                }}
-              >
-                Creative
-                <br />
-                <span style={{ color: theme.colors.primary }}>Developer</span>
-              </h1>
-              <p
-                className="text-lg mb-6 max-w-md transition-colors duration-300 leading-relaxed"
-                style={{ color: theme.colors.textSecondary }}
-              >
-                Crafting extraordinary digital experiences through the perfect
-                harmony of innovative design and cutting-edge technology.
-              </p>
-              <button
-                className="px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                style={{
-                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-                  color: theme.colors.background,
-                }}
-              >
-                Explore My Work →
-              </button>
+              {/* Enhanced layout with button next to text */}
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between h-full">
+                <div className="flex-1">
+                  <h1
+                    className="text-6xl font-bold mb-4 transition-colors duration-300"
+                    style={{
+                      color: theme.colors.text,
+                      fontFamily: "Crimson Pro, serif",
+                      lineHeight: "1.1",
+                    }}
+                  >
+                    Creative
+                    <br />
+                    <span style={{ color: theme.colors.primary }}>
+                      Developer
+                    </span>
+                  </h1>
+                  <p
+                    className="text-lg mb-6 max-w-md transition-colors duration-300 leading-relaxed"
+                    style={{ color: theme.colors.textSecondary }}
+                  >
+                    Crafting extraordinary digital experiences through the
+                    perfect harmony of innovative design and cutting-edge
+                    technology.
+                  </p>
+                </div>
+
+                {/* Button positioned next to text */}
+                <div className="md:self-end">
+                  <button
+                    className="px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl whitespace-nowrap"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                      color: theme.colors.background,
+                    }}
+                  >
+                    Explore My Work →
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Enhanced Profile Widget */}
+            {/* Profile Widget */}
             <div
               ref={(el) => (widgetRefs.current["profile"] = el)}
               className="col-span-12 md:col-span-4 h-80 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
@@ -1286,7 +1336,7 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Enhanced About Widget */}
+            {/* About Widget */}
             <div
               ref={(el) => (widgetRefs.current["about"] = el)}
               className="col-span-12 md:col-span-6 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
@@ -1322,7 +1372,7 @@ export default function Index() {
               </p>
             </div>
 
-            {/* Enhanced Skills Widget */}
+            {/* Skills Widget */}
             <div
               ref={(el) => (widgetRefs.current["skills"] = el)}
               className="col-span-12 md:col-span-3 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
@@ -1382,7 +1432,7 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Enhanced Location Widget */}
+            {/* Location Widget */}
             <div
               ref={(el) => (widgetRefs.current["location"] = el)}
               className="col-span-12 md:col-span-3 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
@@ -1422,7 +1472,7 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Enhanced Projects Widget */}
+            {/* Projects Widget */}
             <div
               ref={(el) => (widgetRefs.current["projects"] = el)}
               className="col-span-12 md:col-span-8 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
@@ -1476,7 +1526,7 @@ export default function Index() {
               ></div>
             </div>
 
-            {/* Enhanced Contact Widget */}
+            {/* Contact Widget */}
             <div
               ref={(el) => (widgetRefs.current["contact"] = el)}
               className="col-span-12 md:col-span-4 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
@@ -1535,56 +1585,85 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Enhanced theme selector */}
+        {/* Redesigned theme selector */}
         <div className="fixed bottom-6 right-6 z-40">
           {showThemeSelector && (
             <div
-              className="absolute bottom-full right-0 mb-4 p-6 rounded-3xl border backdrop-blur-xl animate-fadeIn"
+              className="absolute bottom-full right-0 mb-6 p-6 rounded-3xl border backdrop-blur-xl animate-fadeInScale"
               style={{
-                backgroundColor: `${theme.colors.surface}90`,
+                backgroundColor: `${theme.colors.background}95`,
                 borderColor: `${theme.colors.surfaceElevated}60`,
+                minWidth: "320px",
               }}
             >
-              <h4
-                className="text-sm font-semibold mb-4"
-                style={{ color: theme.colors.text }}
-              >
-                Choose Your Aesthetic
-              </h4>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="mb-6">
+                <h4
+                  className="text-lg font-semibold mb-2"
+                  style={{
+                    color: theme.colors.text,
+                    fontFamily: "Crimson Pro, serif",
+                  }}
+                >
+                  Theme Palette
+                </h4>
+                <p
+                  className="text-xs"
+                  style={{ color: theme.colors.textSecondary }}
+                >
+                  Choose your perfect aesthetic
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
                 {colorThemes.map((themeOption) => (
                   <button
                     key={themeOption.id}
                     onClick={() => handleThemeChange(themeOption.id)}
-                    className="group relative p-3 rounded-xl transition-all duration-300 hover:scale-105"
-                    style={{ backgroundColor: theme.colors.surfaceElevated }}
+                    className={`w-full p-4 rounded-2xl transition-all duration-300 hover:scale-105 border-2 ${
+                      currentTheme === themeOption.id ? "scale-105" : ""
+                    }`}
+                    style={{
+                      backgroundColor: themeOption.colors.surface,
+                      borderColor:
+                        currentTheme === themeOption.id
+                          ? theme.colors.primary
+                          : "transparent",
+                    }}
                   >
-                    <div className="flex flex-col items-center space-y-2">
-                      <div className="flex space-x-1">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex space-x-2">
                         <div
-                          className="w-4 h-4 rounded-full transition-transform duration-200 group-hover:scale-110"
+                          className="w-6 h-6 rounded-full shadow-md"
                           style={{
                             backgroundColor: themeOption.colors.primary,
                           }}
                         />
                         <div
-                          className="w-4 h-4 rounded-full transition-transform duration-200 group-hover:scale-110"
+                          className="w-6 h-6 rounded-full shadow-md"
                           style={{ backgroundColor: themeOption.colors.accent }}
                         />
                       </div>
-                      <span
-                        className="text-xs font-medium"
-                        style={{ color: theme.colors.text }}
-                      >
-                        {themeOption.name.split(" ")[0]}
-                      </span>
+                      <div className="flex-1 text-left">
+                        <div
+                          className="font-semibold text-sm"
+                          style={{ color: themeOption.colors.text }}
+                        >
+                          {themeOption.name}
+                        </div>
+                        <div
+                          className="text-xs mt-1"
+                          style={{ color: themeOption.colors.textSecondary }}
+                        >
+                          {themeOption.description}
+                        </div>
+                      </div>
+                      {currentTheme === themeOption.id && (
+                        <div
+                          className="w-3 h-3 rounded-full animate-pulse"
+                          style={{ backgroundColor: theme.colors.primary }}
+                        ></div>
+                      )}
                     </div>
-                    {currentTheme === themeOption.id && (
-                      <div
-                        className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
-                        style={{ backgroundColor: theme.colors.accent }}
-                      ></div>
-                    )}
                   </button>
                 ))}
               </div>
@@ -1593,9 +1672,9 @@ export default function Index() {
 
           <button
             onClick={() => setShowThemeSelector(!showThemeSelector)}
-            className="w-16 h-16 rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-110 flex items-center justify-center group"
+            className="w-16 h-16 rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-110 flex items-center justify-center group shadow-lg"
             style={{
-              backgroundColor: `${theme.colors.surface}80`,
+              backgroundColor: `${theme.colors.surface}90`,
               borderColor: `${theme.colors.surfaceElevated}60`,
             }}
           >
@@ -1617,7 +1696,7 @@ export default function Index() {
         </div>
       </main>
 
-      {/* Enhanced modal */}
+      {/* Modal */}
       {expandedWidget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div
@@ -1669,6 +1748,10 @@ export default function Index() {
           animation: slideIn 0.4s ease-out;
         }
         
+        .animate-fadeInScale {
+          animation: fadeInScale 0.5s ease-out;
+        }
+        
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(15px); }
           to { opacity: 1; transform: translateY(0); }
@@ -1677,6 +1760,16 @@ export default function Index() {
         @keyframes slideIn {
           from { opacity: 0; transform: scale(0.96) translateY(15px); }
           to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes fadeInScale {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         
         .custom-scrollbar::-webkit-scrollbar {
@@ -1692,14 +1785,6 @@ export default function Index() {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: ${theme.colors.primary}80;
-        }
-        
-        .group:hover .group-hover\\:scale-110 {
-          transform: scale(1.1);
-        }
-        
-        .group:hover .group-hover\\:opacity-50 {
-          opacity: 0.5;
         }
       `}</style>
     </>
