@@ -1934,8 +1934,8 @@ const Index = () => {
                               ? theme.colors.contact
                               : theme.colors.profile,
               border: `1px solid ${theme.colors.primary}20`,
-              // Apply smart growth calculations
-              ...getSmartGrowthStyle(),
+              // Apply memoized smart growth calculations
+              ...expansionStyle,
             }}
           >
             {/* Close Button */}
