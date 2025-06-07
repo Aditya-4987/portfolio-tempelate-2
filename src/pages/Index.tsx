@@ -805,62 +805,447 @@ export default function Index() {
           </div>
         );
 
+      case "profile":
+        return (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-3xl font-semibold mb-6" style={headingStyle}>
+                Professional Profile
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div
+                  className="text-center p-6 rounded-xl"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
+                  <div
+                    className="text-3xl font-bold mb-2"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    8+
+                  </div>
+                  <div className="text-sm" style={secondaryTextStyle}>
+                    Years Experience
+                  </div>
+                </div>
+                <div
+                  className="text-center p-6 rounded-xl"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
+                  <div
+                    className="text-3xl font-bold mb-2"
+                    style={{ color: theme.colors.accent }}
+                  >
+                    150+
+                  </div>
+                  <div className="text-sm" style={secondaryTextStyle}>
+                    Projects Completed
+                  </div>
+                </div>
+                <div
+                  className="text-center p-6 rounded-xl"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
+                  <div
+                    className="text-3xl font-bold mb-2"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    98%
+                  </div>
+                  <div className="text-sm" style={secondaryTextStyle}>
+                    Client Satisfaction
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-base leading-relaxed mb-6" style={textStyle}>
+                Senior Full-Stack Developer and Creative Technologist with
+                expertise in building scalable web applications, modern user
+                interfaces, and innovative digital experiences. Passionate about
+                bridging the gap between design and technology to create
+                meaningful, user-centric solutions.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="text-xl font-semibold" style={headingStyle}>
+                    Core Expertise
+                  </h4>
+                  <ul className="space-y-3 text-sm" style={textStyle}>
+                    <li className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.primary }}
+                      ></div>
+                      <span>React, Next.js & Modern JavaScript</span>
+                    </li>
+                    <li className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.accent }}
+                      ></div>
+                      <span>Node.js & Full-Stack Development</span>
+                    </li>
+                    <li className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.primary }}
+                      ></div>
+                      <span>UI/UX Design & Prototyping</span>
+                    </li>
+                    <li className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.accent }}
+                      ></div>
+                      <span>Cloud Architecture & DevOps</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-xl font-semibold" style={headingStyle}>
+                    Certifications
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <div
+                      className="flex justify-between items-center p-3 rounded-lg"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div>
+                        <div className="font-medium" style={textStyle}>
+                          AWS Solutions Architect
+                        </div>
+                        <div className="text-xs" style={secondaryTextStyle}>
+                          Amazon Web Services
+                        </div>
+                      </div>
+                      <div
+                        className="text-xs"
+                        style={{ color: theme.colors.primary }}
+                      >
+                        2023
+                      </div>
+                    </div>
+                    <div
+                      className="flex justify-between items-center p-3 rounded-lg"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div>
+                        <div className="font-medium" style={textStyle}>
+                          Google UX Design
+                        </div>
+                        <div className="text-xs" style={secondaryTextStyle}>
+                          Google Career Certificate
+                        </div>
+                      </div>
+                      <div
+                        className="text-xs"
+                        style={{ color: theme.colors.primary }}
+                      >
+                        2022
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <button
+                className="w-full py-4 rounded-xl text-black font-semibold text-base transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                }}
+              >
+                Download Resume
+              </button>
+            </div>
+          </div>
+        );
+
       case "about":
         return (
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
               About Me
             </h3>
-            <p className="text-base leading-relaxed" style={textStyle}>
+            <p className="text-base leading-relaxed mb-6" style={textStyle}>
               I'm a passionate creative developer with over 8 years of
               experience in crafting digital experiences that bridge the gap
               between design and technology. My journey started with a curiosity
               about how beautiful interfaces come to life through code.
             </p>
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold" style={headingStyle}>
-                Journey Timeline
-              </h4>
-              <div className="space-y-3 text-sm">
-                <div
-                  className="flex justify-between items-start p-3 rounded-lg"
-                  style={{ backgroundColor: theme.colors.surface }}
-                >
-                  <div>
-                    <div className="font-medium" style={textStyle}>
-                      Senior Developer
+
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold mb-4" style={headingStyle}>
+                  My Philosophy
+                </h4>
+                <p className="text-sm leading-relaxed mb-4" style={textStyle}>
+                  I believe that great software is not just about clean code or
+                  beautiful design—it's about creating experiences that feel
+                  intuitive and meaningful to users. Every project is an
+                  opportunity to solve real problems and make technology more
+                  accessible and delightful.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold mb-4" style={headingStyle}>
+                  Journey Timeline
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div
+                    className="flex justify-between items-start p-4 rounded-lg"
+                    style={{ backgroundColor: theme.colors.surface }}
+                  >
+                    <div>
+                      <div className="font-medium" style={textStyle}>
+                        Senior Developer & Tech Lead
+                      </div>
+                      <div className="text-xs mt-1" style={secondaryTextStyle}>
+                        Tech Innovators Inc. • Leading development teams and
+                        architecting scalable solutions
+                      </div>
                     </div>
-                    <div className="text-xs" style={secondaryTextStyle}>
-                      Tech Innovators Inc.
+                    <div
+                      className="text-xs"
+                      style={{ color: theme.colors.primary }}
+                    >
+                      2020 - Present
                     </div>
                   </div>
                   <div
-                    className="text-xs"
-                    style={{ color: theme.colors.primary }}
+                    className="flex justify-between items-start p-4 rounded-lg"
+                    style={{ backgroundColor: theme.colors.surface }}
                   >
-                    2020 - Present
-                  </div>
-                </div>
-                <div
-                  className="flex justify-between items-start p-3 rounded-lg"
-                  style={{ backgroundColor: theme.colors.surface }}
-                >
-                  <div>
-                    <div className="font-medium" style={textStyle}>
-                      Full-stack Developer
+                    <div>
+                      <div className="font-medium" style={textStyle}>
+                        Full-Stack Developer
+                      </div>
+                      <div className="text-xs mt-1" style={secondaryTextStyle}>
+                        Digital Solutions Co. • Built end-to-end web
+                        applications and mobile solutions
+                      </div>
                     </div>
-                    <div className="text-xs" style={secondaryTextStyle}>
-                      Digital Solutions Co.
+                    <div
+                      className="text-xs"
+                      style={{ color: theme.colors.primary }}
+                    >
+                      2018 - 2020
                     </div>
                   </div>
                   <div
-                    className="text-xs"
-                    style={{ color: theme.colors.primary }}
+                    className="flex justify-between items-start p-4 rounded-lg"
+                    style={{ backgroundColor: theme.colors.surface }}
                   >
-                    2018 - 2020
+                    <div>
+                      <div className="font-medium" style={textStyle}>
+                        Frontend Developer
+                      </div>
+                      <div className="text-xs mt-1" style={secondaryTextStyle}>
+                        StartupTech • Focused on React development and user
+                        interface design
+                      </div>
+                    </div>
+                    <div
+                      className="text-xs"
+                      style={{ color: theme.colors.primary }}
+                    >
+                      2016 - 2018
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <div>
+                <h4 className="text-lg font-semibold mb-4" style={headingStyle}>
+                  When I'm Not Coding
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">📸</span>
+                    <span style={textStyle}>Photography</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">🎸</span>
+                    <span style={textStyle}>Music Production</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">🥾</span>
+                    <span style={textStyle}>Hiking</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">📚</span>
+                    <span style={textStyle}>Reading Tech Blogs</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "location":
+        return (
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
+              Location & Availability
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h4
+                    className="text-lg font-semibold mb-3"
+                    style={headingStyle}
+                  >
+                    Current Location
+                  </h4>
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="text-2xl">🌉</span>
+                    <div>
+                      <div className="font-medium" style={textStyle}>
+                        San Francisco, CA
+                      </div>
+                      <div className="text-sm" style={secondaryTextStyle}>
+                        Pacific Standard Time (PST)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm" style={secondaryTextStyle}>
+                    Located in the heart of Silicon Valley, perfectly positioned
+                    for tech collaboration
+                  </div>
+                </div>
+
+                <div>
+                  <h4
+                    className="text-lg font-semibold mb-3"
+                    style={headingStyle}
+                  >
+                    Work Preferences
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.primary }}
+                      ></div>
+                      <span style={textStyle}>Remote work worldwide</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.accent }}
+                      ></div>
+                      <span style={textStyle}>Hybrid collaborations</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: theme.colors.primary }}
+                      ></div>
+                      <span style={textStyle}>On-site consultations</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h4
+                    className="text-lg font-semibold mb-3"
+                    style={headingStyle}
+                  >
+                    Availability
+                  </h4>
+                  <div className="space-y-3">
+                    <div
+                      className="p-4 rounded-lg"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium" style={textStyle}>
+                          Freelance Projects
+                        </span>
+                        <span
+                          className="text-xs px-2 py-1 rounded-full"
+                          style={{
+                            backgroundColor: theme.colors.primary,
+                            color: theme.colors.background,
+                          }}
+                        >
+                          Available
+                        </span>
+                      </div>
+                      <div className="text-xs" style={secondaryTextStyle}>
+                        Taking on new projects starting Q2 2024
+                      </div>
+                    </div>
+
+                    <div
+                      className="p-4 rounded-lg"
+                      style={{ backgroundColor: theme.colors.surface }}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium" style={textStyle}>
+                          Consulting
+                        </span>
+                        <span
+                          className="text-xs px-2 py-1 rounded-full"
+                          style={{
+                            backgroundColor: theme.colors.accent,
+                            color: theme.colors.background,
+                          }}
+                        >
+                          Open
+                        </span>
+                      </div>
+                      <div className="text-xs" style={secondaryTextStyle}>
+                        Available for technical consultations and code reviews
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4
+                    className="text-lg font-semibold mb-3"
+                    style={headingStyle}
+                  >
+                    Languages
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span style={textStyle}>English</span>
+                      <span style={{ color: theme.colors.primary }}>
+                        Native
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span style={textStyle}>Spanish</span>
+                      <span style={{ color: theme.colors.accent }}>
+                        Conversational
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span style={textStyle}>Japanese</span>
+                      <span style={{ color: theme.colors.primary }}>Basic</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6">
+              <button
+                className="w-full py-4 rounded-xl text-black font-semibold text-base transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                }}
+              >
+                Schedule a Meeting
+              </button>
             </div>
           </div>
         );
