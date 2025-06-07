@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 
 /**
  * Perfect Bentolio Portfolio Website
- * Features overlay popup expansion with dynamic blur effects
+ * Features smart directional widget expansion with sequential blur effects
  */
 
 // Types for better organization
@@ -45,6 +45,7 @@ const Index = () => {
   const [widgetPosition, setWidgetPosition] = useState<WidgetPosition | null>(
     null,
   );
+  const [showBlur, setShowBlur] = useState(false);
 
   // Refs for widget elements
   const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -227,6 +228,19 @@ const Index = () => {
     }
   }, [expandedWidget]);
 
+  // Handle blur effect after expansion completes
+  useEffect(() => {
+    if (expandedWidget) {
+      // Start blur after expansion animation completes
+      const timer = setTimeout(() => {
+        setShowBlur(true);
+      }, 600); // 600ms for expansion + 100ms buffer
+      return () => clearTimeout(timer);
+    } else {
+      setShowBlur(false);
+    }
+  }, [expandedWidget]);
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -236,7 +250,91 @@ const Index = () => {
 
   // ==================== HELPER FUNCTIONS ====================
 
-  // Handle widget expansion with overlay popup
+  // Calculate smart directional growth
+  const getSmartGrowthStyle = () => {
+    if (!widgetPosition) return {};
+
+    const headerHeight = 80; // Header height
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const margin = 20; // Margin from edges
+
+    const originalRect = widgetPosition;
+
+    // Determine constraints based on position
+    const touchesTop = originalRect.top <= headerHeight + margin;
+    const touchesLeft = originalRect.left <= margin;
+    const touchesRight =
+      originalRect.left + originalRect.width >= viewportWidth - margin;
+    const touchesBottom =
+      originalRect.top + originalRect.height >= viewportHeight - margin;
+
+    // Calculate expansion directions
+    let expandLeft = true;
+    let expandRight = true;
+    let expandUp = true;
+    let expandDown = true;
+
+    // Apply constraints
+    if (touchesLeft) expandLeft = false;
+    if (touchesRight) expandRight = false;
+    if (touchesTop) expandUp = false;
+    if (touchesBottom) expandDown = false;
+
+    // Calculate new dimensions and position
+    const baseExpansion = 200; // Base expansion amount
+    let newWidth = originalRect.width;
+    let newHeight = originalRect.height + 200; // Always expand height for content
+    let newTop = originalRect.top;
+    let newLeft = originalRect.left;
+
+    // Apply horizontal expansion
+    if (expandLeft && expandRight) {
+      newWidth = originalRect.width + baseExpansion;
+      newLeft = originalRect.left - baseExpansion / 2;
+    } else if (expandRight && !expandLeft) {
+      newWidth = originalRect.width + baseExpansion / 2;
+    } else if (expandLeft && !expandRight) {
+      newWidth = originalRect.width + baseExpansion / 2;
+      newLeft = originalRect.left - baseExpansion / 2;
+    }
+
+    // Apply vertical expansion
+    if (expandUp && expandDown) {
+      newHeight = originalRect.height + baseExpansion + 200;
+      newTop = originalRect.top - baseExpansion / 2;
+    } else if (expandDown && !expandUp) {
+      newHeight = originalRect.height + baseExpansion + 100;
+    } else if (expandUp && !expandDown) {
+      newHeight = originalRect.height + baseExpansion + 100;
+      newTop = originalRect.top - baseExpansion - 100;
+    }
+
+    // Ensure minimum size
+    newWidth = Math.max(newWidth, 400);
+    newHeight = Math.max(newHeight, 450);
+
+    // Ensure it doesn't go outside viewport
+    newLeft = Math.max(
+      margin,
+      Math.min(newLeft, viewportWidth - newWidth - margin),
+    );
+    newTop = Math.max(
+      headerHeight + margin,
+      Math.min(newTop, viewportHeight - newHeight - margin),
+    );
+
+    return {
+      top: newTop,
+      left: newLeft,
+      width: newWidth,
+      height: newHeight,
+      transform: "scale(1)",
+      transformOrigin: "center center",
+    };
+  };
+
+  // Handle widget expansion
   const handleWidgetInteraction = (
     widgetName: string,
     action: "hover" | "leave" | "click",
@@ -325,29 +423,6 @@ const Index = () => {
   // Check if widget is expanded
   const isWidgetExpanded = (widgetName: string) => {
     return expandedWidget === widgetName;
-  };
-
-  // Get expansion transform for overlay
-  const getOverlayTransform = () => {
-    if (!widgetPosition) return {};
-
-    const viewportCenterX = window.innerWidth / 2;
-    const viewportCenterY = window.innerHeight / 2;
-    const widgetCenterX = widgetPosition.left + widgetPosition.width / 2;
-    const widgetCenterY = widgetPosition.top + widgetPosition.height / 2;
-
-    // Calculate how much to move toward center
-    const deltaX = viewportCenterX - widgetCenterX;
-    const deltaY = viewportCenterY - widgetCenterY;
-
-    // Move 40% of the way toward center
-    const translateX = deltaX * 0.4;
-    const translateY = deltaY * 0.4;
-
-    return {
-      transform: `translate(${translateX}px, ${translateY}px) scale(1.5)`,
-      transformOrigin: "center center",
-    };
   };
 
   // Get visible skills for the main widget (5 skills with fade)
@@ -1010,26 +1085,17 @@ const Index = () => {
           </div>
         </div>
 
-        {/* ==================== DYNAMIC BLUR BACKDROP ==================== */}
-        {expandedWidget && widgetPosition && (
-          <div
-            className="fixed inset-0 z-40 pointer-events-none transition-opacity duration-500"
-            style={{
-              background: `radial-gradient(circle at ${widgetPosition.left + widgetPosition.width / 2}px ${widgetPosition.top + widgetPosition.height / 2}px, transparent 100px, rgba(0,0,0,0.6) 300px)`,
-              backdropFilter: `blur(8px)`,
-            }}
-          />
-        )}
-
         {/* ==================== MAIN PORTFOLIO CONTENT ==================== */}
         <div
           className={`w-full p-[14px] min-h-screen transition-all duration-1000 ${
             showMain ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+          } ${showBlur ? "blur-sm" : "blur-0"}`}
         >
           <div className="grid grid-cols-12 gap-[14px] min-h-screen relative z-10">
             {/* ==================== HEADER SECTION (NO BLUR) ==================== */}
-            <div className="col-span-12 h-20 flex items-center justify-between px-6 backdrop-blur-sm relative z-50">
+            <div
+              className={`col-span-12 h-20 flex items-center justify-between px-6 backdrop-blur-sm relative z-50 ${showBlur ? "blur-0" : ""}`}
+            >
               <div
                 className="text-3xl font-light tracking-wide relative group"
                 style={{
@@ -1061,11 +1127,7 @@ const Index = () => {
               {/* ==================== HERO SECTION ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["hero"] = el)}
-                className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("hero")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(86, 84, 73)" }}
                 onMouseEnter={() => handleWidgetInteraction("hero", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("hero", "leave")}
@@ -1113,11 +1175,7 @@ const Index = () => {
               {/* ==================== PROFILE CARD ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["profile"] = el)}
-                className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("profile")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(45, 46, 40)" }}
                 onMouseEnter={() => handleWidgetInteraction("profile", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("profile", "leave")}
@@ -1164,11 +1222,7 @@ const Index = () => {
               {/* ==================== ABOUT SECTION ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["about"] = el)}
-                className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("about")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(35, 36, 30)" }}
                 onMouseEnter={() => handleWidgetInteraction("about", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("about", "leave")}
@@ -1204,11 +1258,7 @@ const Index = () => {
               {/* ==================== SKILLS SECTION ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["skills"] = el)}
-                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("skills")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(55, 56, 50)" }}
                 onMouseEnter={() => handleWidgetInteraction("skills", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("skills", "leave")}
@@ -1248,25 +1298,12 @@ const Index = () => {
                     }}
                   />
                 </div>
-
-                <div className="absolute bottom-4 left-6 right-6">
-                  <div
-                    className="text-xs opacity-60 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    Click to see all
-                  </div>
-                </div>
               </div>
 
               {/* ==================== LOCATION CARD ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["location"] = el)}
-                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("location")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(65, 66, 60)" }}
                 onMouseEnter={() =>
                   handleWidgetInteraction("location", "hover")
@@ -1308,11 +1345,7 @@ const Index = () => {
               {/* ==================== PROJECTS SECTION ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["projects"] = el)}
-                className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("projects")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(75, 76, 70)" }}
                 onMouseEnter={() =>
                   handleWidgetInteraction("projects", "hover")
@@ -1356,25 +1389,12 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
-
-                <div className="absolute bottom-4 right-6">
-                  <button
-                    className="text-xs opacity-60 group-hover:opacity-100 transition-all duration-300 hover:underline"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    View All Projects →
-                  </button>
-                </div>
               </div>
 
               {/* ==================== CONTACT SECTION ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["contact"] = el)}
-                className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden cursor-pointer transition-all duration-300 ${
-                  isWidgetExpanded("contact")
-                    ? "opacity-50"
-                    : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                } group`}
+                className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(25, 26, 20)" }}
                 onMouseEnter={() => handleWidgetInteraction("contact", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("contact", "leave")}
@@ -1444,7 +1464,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* ==================== OVERLAY POPUP ==================== */}
+        {/* ==================== SMART EXPANSION OVERLAY ==================== */}
         {expandedWidget && widgetPosition && (
           <div
             className="fixed z-60 rounded-2xl p-8 shadow-2xl transition-all duration-500 overflow-y-auto"
@@ -1465,14 +1485,8 @@ const Index = () => {
                             : expandedWidget === "contact"
                               ? "rgb(25, 26, 20)"
                               : "rgb(45, 46, 40)",
-              top: widgetPosition.top,
-              left: widgetPosition.left,
-              width: Math.max(widgetPosition.width, 400),
-              height: Math.max(widgetPosition.height + 200, 500),
-              maxHeight: "80vh",
-              maxWidth: "600px",
               border: "1px solid rgba(216, 207, 188, 0.2)",
-              ...getOverlayTransform(),
+              ...getSmartGrowthStyle(),
             }}
           >
             {/* Close Button */}
