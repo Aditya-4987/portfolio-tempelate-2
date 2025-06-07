@@ -594,22 +594,26 @@ const Index = () => {
   }, [expandedWidget, theme.colors]);
 
   /**
-   * CALCULATE EXPANSION STYLE - Runs in useEffect to avoid render loop
+   * STABLE EXPANSION STYLE - Calculate only when absolutely necessary
    */
-  useEffect(() => {
-    if (expandedWidget && widgetPosition) {
-      const style = getSmartGrowthStyle();
-      setExpansionStyle(style);
-    } else {
-      setExpansionStyle({});
+  const getStableExpansionStyle = () => {
+    if (!expandedWidget || !widgetPosition || typeof window === "undefined") {
+      return {};
     }
-  }, [
-    expandedWidget,
-    widgetPosition?.top,
-    widgetPosition?.left,
-    widgetPosition?.width,
-    widgetPosition?.height,
-  ]);
+
+    // Use static dimensions to prevent re-render loops
+    const baseStyle = {
+      position: "fixed" as const,
+      top: Math.max(100, widgetPosition.top - 50),
+      left: Math.max(20, widgetPosition.left - 50),
+      width: Math.min(600, window.innerWidth - 40),
+      height: Math.min(500, window.innerHeight - 140),
+      transform: "scale(1)",
+      transformOrigin: "center center",
+    };
+
+    return baseStyle;
+  };
 
   /**
    * IMPROVED WIDGET INTERACTION HANDLER
