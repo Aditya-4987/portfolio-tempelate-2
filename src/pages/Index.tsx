@@ -9,20 +9,10 @@ import { useEffect, useState, useRef, useMemo } from "react";
  * - Enhanced color themes with perfect contrast ratios
  * - Sophisticated micro-interactions and animations
  * - Premium aesthetic design language
- *
- * Key Features:
- * - Advanced loading sequences with morphing elements
- * - Professional typography hierarchy
- * - Accessible color contrast across all themes
- * - Elegant hover states and transitions
- * - Complex particle animation systems
  */
 
 // ==================== TYPE DEFINITIONS ====================
 
-/**
- * Skill data structure with proficiency levels and descriptions
- */
 interface Skill {
   name: string;
   level: number;
@@ -30,9 +20,6 @@ interface Skill {
   category: string;
 }
 
-/**
- * Project data structure with comprehensive project information
- */
 interface Project {
   id: number;
   name: string;
@@ -43,9 +30,6 @@ interface Project {
   featured: boolean;
 }
 
-/**
- * Widget position tracking for expansion calculations
- */
 interface WidgetPosition {
   top: number;
   left: number;
@@ -53,9 +37,6 @@ interface WidgetPosition {
   height: number;
 }
 
-/**
- * Enhanced color theme configuration with accessibility-focused contrast
- */
 interface ColorTheme {
   id: string;
   name: string;
@@ -137,7 +118,7 @@ const colorThemes: ColorTheme[] = [
       projects: "rgb(32, 57, 39)",
       contact: "rgb(23, 46, 29)",
       surface: "rgb(30, 55, 37)",
-      surfaceElevated: "rgb(40, 70, 48),
+      surfaceElevated: "rgb(40, 70, 48)",
     },
   },
   {
@@ -264,7 +245,7 @@ const colorThemes: ColorTheme[] = [
 
 export default function Index() {
   // ==================== STATE MANAGEMENT ====================
-  
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [showMain, setShowMain] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -273,27 +254,27 @@ export default function Index() {
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const [clickedWidget, setClickedWidget] = useState<string | null>(null);
-  const [widgetPosition, setWidgetPosition] = useState<WidgetPosition | null>(null);
+  const [widgetPosition, setWidgetPosition] = useState<WidgetPosition | null>(
+    null,
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [skillAnimations, setSkillAnimations] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, opacity: number, scale: number}>>([]);
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; opacity: number; scale: number }>
+  >([]);
 
-  // Widget refs for position tracking
   const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // ==================== MEMOIZED THEME ====================
-  
-  const theme = useMemo(() => 
-    colorThemes.find((t) => t.id === currentTheme) || colorThemes[0], 
-    [currentTheme]
+
+  const theme = useMemo(
+    () => colorThemes.find((t) => t.id === currentTheme) || colorThemes[0],
+    [currentTheme],
   );
 
   // ==================== SAMPLE DATA ====================
 
-  /**
-   * Enhanced skills data with more sophisticated categorization
-   */
   const allSkills: Skill[] = [
     {
       name: "React & Next.js",
@@ -357,14 +338,12 @@ export default function Index() {
     },
   ];
 
-  /**
-   * Enhanced project showcase with more sophisticated categorization
-   */
   const allProjects: Project[] = [
     {
       id: 1,
       name: "FinTech Dashboard",
-      description: "Real-time trading platform with advanced analytics and AI insights",
+      description:
+        "Real-time trading platform with advanced analytics and AI insights",
       tech: ["Next.js", "TypeScript", "D3.js", "WebSocket", "PostgreSQL"],
       image: "/api/placeholder/600/400",
       liveUrl: "https://example.com",
@@ -373,7 +352,8 @@ export default function Index() {
     {
       id: 2,
       name: "Neural Design System",
-      description: "AI-powered component library with automatic accessibility optimization",
+      description:
+        "AI-powered component library with automatic accessibility optimization",
       tech: ["React", "Storybook", "TensorFlow.js", "TypeScript", "Tailwind"],
       image: "/api/placeholder/600/400",
       liveUrl: "https://example.com",
@@ -419,9 +399,6 @@ export default function Index() {
 
   // ==================== SOPHISTICATED LOADING ANIMATION ====================
 
-  /**
-   * Enhanced multi-phase loading animation with particle effects
-   */
   useEffect(() => {
     const phases = [
       { duration: 3000, increment: 0.4, name: "Initializing Core Systems" },
@@ -433,7 +410,6 @@ export default function Index() {
     let currentPhase = 0;
     let phaseProgress = 0;
 
-    // Initialize particles
     const initialParticles = Array.from({ length: 12 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -447,7 +423,6 @@ export default function Index() {
       const phase = phases[currentPhase];
       phaseProgress += phase.increment + Math.random() * 0.8;
 
-      // Enhanced phase transition logic with smoother progression
       if (currentPhase === 0 && phaseProgress >= 20) {
         setLoadingPhase(1);
         currentPhase = 1;
@@ -464,16 +439,16 @@ export default function Index() {
 
       setProgress(Math.min(phaseProgress, 100));
 
-      // Animate particles
-      setParticles(prev => prev.map(particle => ({
-        ...particle,
-        x: (particle.x + 0.3) % 100,
-        y: particle.y + Math.sin(Date.now() * 0.001 + particle.id) * 0.1,
-        opacity: 0.3 + Math.sin(Date.now() * 0.002 + particle.id) * 0.3,
-        scale: 0.4 + Math.sin(Date.now() * 0.0015 + particle.id) * 0.4,
-      })));
+      setParticles((prev) =>
+        prev.map((particle) => ({
+          ...particle,
+          x: (particle.x + 0.3) % 100,
+          y: particle.y + Math.sin(Date.now() * 0.001 + particle.id) * 0.1,
+          opacity: 0.3 + Math.sin(Date.now() * 0.002 + particle.id) * 0.3,
+          scale: 0.4 + Math.sin(Date.now() * 0.0015 + particle.id) * 0.4,
+        })),
+      );
 
-      // Complete loading sequence with dramatic final animation
       if (phaseProgress >= 100) {
         clearInterval(timer);
         setTimeout(() => {
@@ -486,9 +461,6 @@ export default function Index() {
     return () => clearInterval(timer);
   }, []);
 
-  /**
-   * Enhanced skills animation with staggered timing
-   */
   useEffect(() => {
     if (expandedWidget === "skills") {
       setTimeout(() => setSkillAnimations(true), 400);
@@ -499,12 +471,9 @@ export default function Index() {
 
   // ==================== INTERACTION HANDLERS ====================
 
-  /**
-   * Enhanced widget interaction with smoother animations
-   */
   const handleWidgetClick = (widgetName: string) => {
     const element = widgetRefs.current[widgetName];
-    
+
     if (clickedWidget === widgetName) {
       setExpandedWidget(null);
       setClickedWidget(null);
@@ -531,7 +500,7 @@ export default function Index() {
       Skills: "skills",
       Contact: "contact",
     };
-    
+
     const widgetName = widgetMap[item] || item.toLowerCase();
     handleWidgetClick(widgetName);
     setIsMobileMenuOpen(false);
@@ -544,16 +513,13 @@ export default function Index() {
 
   // ==================== CONTENT RENDERING ====================
 
-  /**
-   * Enhanced content renderer with sophisticated typography
-   */
   const renderExpandedContent = (widgetName: string) => {
     const textStyle = { color: theme.colors.text };
     const secondaryTextStyle = { color: theme.colors.textSecondary };
-    const headingStyle = { 
-      color: theme.colors.text, 
+    const headingStyle = {
+      color: theme.colors.text,
       fontFamily: "Crimson Pro, serif",
-      fontWeight: "600"
+      fontWeight: "600",
     };
 
     switch (widgetName) {
@@ -565,61 +531,106 @@ export default function Index() {
                 Our Philosophy
               </h3>
               <p className="text-base leading-relaxed mb-6" style={textStyle}>
-                We believe exceptional design is born from the intersection of artistry 
-                and functionality. Every pixel, every interaction, every line of code 
-                is crafted with intention, creating experiences that resonate on both 
-                emotional and practical levels.
+                We believe exceptional design is born from the intersection of
+                artistry and functionality. Every pixel, every interaction,
+                every line of code is crafted with intention, creating
+                experiences that resonate on both emotional and practical
+                levels.
               </p>
-              <blockquote className="border-l-4 pl-6 italic text-lg mb-6" 
-                         style={{ borderColor: theme.colors.primary, color: theme.colors.textSecondary }}>
-                "Design is not just what it looks like and feels like. Design is how it works."
-                <footer className="text-sm mt-2" style={secondaryTextStyle}>— Steve Jobs</footer>
+              <blockquote
+                className="border-l-4 pl-6 italic text-lg mb-6"
+                style={{
+                  borderColor: theme.colors.primary,
+                  color: theme.colors.textSecondary,
+                }}
+              >
+                "Design is not just what it looks like and feels like. Design is
+                how it works."
+                <footer className="text-sm mt-2" style={secondaryTextStyle}>
+                  — Steve Jobs
+                </footer>
               </blockquote>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="text-xl font-semibold" style={headingStyle}>Premium Services</h4>
+                <h4 className="text-xl font-semibold" style={headingStyle}>
+                  Premium Services
+                </h4>
                 <ul className="space-y-3 text-sm" style={textStyle}>
                   <li className="flex items-center space-x-3">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.colors.primary }}></div>
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: theme.colors.primary }}
+                    ></div>
                     <span>Full-Stack Application Development</span>
                   </li>
                   <li className="flex items-center space-x-3">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.colors.accent }}></div>
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: theme.colors.accent }}
+                    ></div>
                     <span>UI/UX Design & Research</span>
                   </li>
                   <li className="flex items-center space-x-3">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.colors.primary }}></div>
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: theme.colors.primary }}
+                    ></div>
                     <span>Performance Optimization</span>
                   </li>
                   <li className="flex items-center space-x-3">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: theme.colors.accent }}></div>
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: theme.colors.accent }}
+                    ></div>
                     <span>Technical Leadership</span>
                   </li>
                 </ul>
               </div>
-              
+
               <div className="space-y-4">
-                <h4 className="text-xl font-semibold" style={headingStyle}>Achievements</h4>
+                <h4 className="text-xl font-semibold" style={headingStyle}>
+                  Achievements
+                </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: theme.colors.surface }}>
-                    <div className="text-2xl font-bold mb-1" style={{ color: theme.colors.primary }}>150+</div>
-                    <div className="text-xs" style={secondaryTextStyle}>Projects Delivered</div>
+                  <div
+                    className="text-center p-4 rounded-xl"
+                    style={{ backgroundColor: theme.colors.surface }}
+                  >
+                    <div
+                      className="text-2xl font-bold mb-1"
+                      style={{ color: theme.colors.primary }}
+                    >
+                      150+
+                    </div>
+                    <div className="text-xs" style={secondaryTextStyle}>
+                      Projects Delivered
+                    </div>
                   </div>
-                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: theme.colors.surface }}>
-                    <div className="text-2xl font-bold mb-1" style={{ color: theme.colors.accent }}>98%</div>
-                    <div className="text-xs" style={secondaryTextStyle}>Client Satisfaction</div>
+                  <div
+                    className="text-center p-4 rounded-xl"
+                    style={{ backgroundColor: theme.colors.surface }}
+                  >
+                    <div
+                      className="text-2xl font-bold mb-1"
+                      style={{ color: theme.colors.accent }}
+                    >
+                      98%
+                    </div>
+                    <div className="text-xs" style={secondaryTextStyle}>
+                      Client Satisfaction
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="pt-6">
-              <button 
+              <button
                 className="w-full py-4 rounded-xl text-black font-semibold text-base transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                style={{ 
-                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})` 
+                style={{
+                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
                 }}
               >
                 Start Your Project Journey
@@ -631,40 +642,259 @@ export default function Index() {
       case "skills":
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>Technical Expertise</h3>
-            
+            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
+              Technical Expertise
+            </h3>
+
             <div className="space-y-6">
               {allSkills.map((skill, index) => (
                 <div key={skill.name} className="space-y-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-base font-medium" style={textStyle}>{skill.name}</span>
-                      <div className="text-xs mt-1" style={{ color: theme.colors.primary }}>{skill.category}</div>
+                      <span className="text-base font-medium" style={textStyle}>
+                        {skill.name}
+                      </span>
+                      <div
+                        className="text-xs mt-1"
+                        style={{ color: theme.colors.primary }}
+                      >
+                        {skill.category}
+                      </div>
                     </div>
-                    <span className="text-lg font-semibold" style={{ color: theme.colors.accent }}>{skill.level}%</span>
+                    <span
+                      className="text-lg font-semibold"
+                      style={{ color: theme.colors.accent }}
+                    >
+                      {skill.level}%
+                    </span>
                   </div>
-                  
+
                   <div className="w-full bg-black/20 rounded-full h-3 overflow-hidden">
-                    <div 
+                    <div
                       className="h-full rounded-full transition-all duration-1500 ease-out relative overflow-hidden"
-                      style={{ 
-                        width: skillAnimations ? `${skill.level}%` : '0%',
+                      style={{
+                        width: skillAnimations ? `${skill.level}%` : "0%",
                         background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-                        transitionDelay: `${index * 150}ms`
+                        transitionDelay: `${index * 150}ms`,
                       }}
                     >
                       <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                     </div>
                   </div>
-                  
-                  <p className="text-sm" style={secondaryTextStyle}>{skill.description}</p>
+
+                  <p className="text-sm" style={secondaryTextStyle}>
+                    {skill.description}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
         );
 
-      // ... Continue with other cases but keeping them concise for space
+      case "about":
+        return (
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
+              About Me
+            </h3>
+            <p className="text-base leading-relaxed" style={textStyle}>
+              I'm a passionate creative developer with over 8 years of
+              experience in crafting digital experiences that bridge the gap
+              between design and technology. My journey started with a curiosity
+              about how beautiful interfaces come to life through code.
+            </p>
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold" style={headingStyle}>
+                Journey Timeline
+              </h4>
+              <div className="space-y-3 text-sm">
+                <div
+                  className="flex justify-between items-start p-3 rounded-lg"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
+                  <div>
+                    <div className="font-medium" style={textStyle}>
+                      Senior Developer
+                    </div>
+                    <div className="text-xs" style={secondaryTextStyle}>
+                      Tech Innovators Inc.
+                    </div>
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    2020 - Present
+                  </div>
+                </div>
+                <div
+                  className="flex justify-between items-start p-3 rounded-lg"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
+                  <div>
+                    <div className="font-medium" style={textStyle}>
+                      Full-stack Developer
+                    </div>
+                    <div className="text-xs" style={secondaryTextStyle}>
+                      Digital Solutions Co.
+                    </div>
+                  </div>
+                  <div
+                    className="text-xs"
+                    style={{ color: theme.colors.primary }}
+                  >
+                    2018 - 2020
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "projects":
+        return (
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
+              Featured Projects
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {allProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="p-6 rounded-xl transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
+                  <div
+                    className="aspect-video bg-gradient-to-br rounded-lg mb-4 flex items-center justify-center"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.colors.primary}20, ${theme.colors.accent}20)`,
+                    }}
+                  >
+                    <div className="text-3xl opacity-60">🖼️</div>
+                  </div>
+
+                  <h4 className="font-semibold mb-3" style={textStyle}>
+                    {project.name}
+                  </h4>
+                  <p className="text-sm mb-4" style={secondaryTextStyle}>
+                    {project.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.tech.map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: theme.colors.surfaceElevated,
+                          color: theme.colors.text,
+                        }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    className="w-full py-3 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                      color: theme.colors.background,
+                    }}
+                  >
+                    Visit Project →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "contact":
+        return (
+          <div className="space-y-6">
+            <h3 className="text-2xl font-semibold mb-6" style={headingStyle}>
+              Get In Touch
+            </h3>
+            <p className="text-base mb-6" style={textStyle}>
+              Ready to bring your ideas to life? Let's discuss your next project
+              and create something amazing together.
+            </p>
+
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={textStyle}
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
+                    style={{
+                      backgroundColor: theme.colors.surface,
+                      borderColor: theme.colors.surfaceElevated,
+                      color: theme.colors.text,
+                    }}
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={textStyle}
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none"
+                    style={{
+                      backgroundColor: theme.colors.surface,
+                      borderColor: theme.colors.surfaceElevated,
+                      color: theme.colors.text,
+                    }}
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={textStyle}
+                >
+                  Message
+                </label>
+                <textarea
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg border transition-colors duration-200 focus:outline-none resize-none"
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.surfaceElevated,
+                    color: theme.colors.text,
+                  }}
+                  placeholder="Tell me about your project..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                  color: theme.colors.background,
+                }}
+              >
+                Send Message
+              </button>
+            </form>
+          </div>
+        );
+
       default:
         return (
           <div className="space-y-6">
@@ -672,42 +902,46 @@ export default function Index() {
               {widgetName.charAt(0).toUpperCase() + widgetName.slice(1)}
             </h3>
             <p className="text-base" style={textStyle}>
-              Enhanced content for {widgetName} widget with sophisticated design.
+              Enhanced content for {widgetName} widget with sophisticated
+              design.
             </p>
           </div>
         );
     }
   };
 
-  // ==================== LOADING CONTENT ====================
-
   const getLoadingContent = () => {
     const phases = [
-      { text: "Initializing Core Systems", subtitle: "Setting up the foundation" },
-      { text: "Loading Creative Assets", subtitle: "Preparing visual elements" },
+      {
+        text: "Initializing Core Systems",
+        subtitle: "Setting up the foundation",
+      },
+      {
+        text: "Loading Creative Assets",
+        subtitle: "Preparing visual elements",
+      },
       { text: "Optimizing Experience", subtitle: "Fine-tuning performance" },
-      { text: "Finalizing Interface", subtitle: "Polishing interactions" }
+      { text: "Finalizing Interface", subtitle: "Polishing interactions" },
     ];
-    
+
     const phase = phases[loadingPhase] || phases[0];
-    return { 
-      text: phase.text, 
+    return {
+      text: phase.text,
       subtitle: phase.subtitle,
-      color: theme.colors.primary 
+      color: theme.colors.primary,
     };
   };
 
-  // ==================== SOPHISTICATED LOADING SCREEN ====================
-  
+  // ==================== LOADING SCREEN ====================
+
   if (!isLoaded) {
     return (
-      <div 
+      <div
         className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ 
+        style={{
           background: `radial-gradient(ellipse at center, ${theme.colors.background}cc 0%, ${theme.colors.background} 100%)`,
         }}
       >
-        {/* Animated particle background */}
         <div className="absolute inset-0 overflow-hidden">
           {particles.map((particle) => (
             <div
@@ -720,83 +954,79 @@ export default function Index() {
                 transform: `scale(${particle.scale})`,
                 backgroundColor: theme.colors.primary,
                 boxShadow: `0 0 ${particle.scale * 10}px ${theme.colors.primary}40`,
-                transition: 'all 0.3s ease-out',
+                transition: "all 0.3s ease-out",
               }}
             />
           ))}
         </div>
 
-        {/* Sophisticated geometric animations */}
         <div className="absolute inset-0 opacity-20">
-          <div 
+          <div
             className="absolute top-1/4 left-1/4 w-32 h-32 border-2 rounded-full animate-spin"
-            style={{ 
+            style={{
               borderColor: theme.colors.primary,
               borderTopColor: "transparent",
-              animationDuration: "8s"
+              animationDuration: "8s",
             }}
           />
-          <div 
+          <div
             className="absolute bottom-1/4 right-1/4 w-24 h-24 border-2 rounded-full animate-spin"
-            style={{ 
+            style={{
               borderColor: theme.colors.accent,
               borderTopColor: "transparent",
               animationDuration: "12s",
-              animationDirection: "reverse"
+              animationDirection: "reverse",
             }}
           />
-          <div 
+          <div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-dashed rounded-full animate-pulse"
-            style={{ 
+            style={{
               borderColor: theme.colors.primary,
-              animationDuration: "4s"
+              animationDuration: "4s",
             }}
           />
         </div>
 
-        {/* Main loading content with enhanced typography */}
         <div className="z-10 text-center space-y-8 max-w-md mx-auto px-6">
           <div className="space-y-6">
-            {/* Sophisticated spinner */}
             <div className="relative mx-auto w-24 h-24">
-              <div 
+              <div
                 className="absolute inset-0 border-4 border-t-transparent rounded-full animate-spin"
-                style={{ 
+                style={{
                   borderColor: theme.colors.primary,
-                  borderTopColor: "transparent" 
+                  borderTopColor: "transparent",
                 }}
               />
-              <div 
+              <div
                 className="absolute inset-2 border-2 border-b-transparent rounded-full animate-spin"
-                style={{ 
+                style={{
                   borderColor: theme.colors.accent,
                   borderBottomColor: "transparent",
                   animationDirection: "reverse",
-                  animationDuration: "2s"
+                  animationDuration: "2s",
                 }}
               />
             </div>
-            
-            {/* Enhanced brand typography */}
+
             <div className="space-y-3">
-              <h1 
+              <h1
                 className="text-5xl font-bold tracking-wider"
-                style={{ 
+                style={{
                   color: theme.colors.text,
                   fontFamily: "Crimson Pro, serif",
-                  textShadow: `0 0 30px ${theme.colors.primary}40`
+                  textShadow: `0 0 30px ${theme.colors.primary}40`,
                 }}
               >
                 Bentolio
               </h1>
               <div className="space-y-2">
-                <p 
+                <p
                   className="text-xl font-medium"
                   style={{ color: getLoadingContent().color }}
                 >
                   {getLoadingContent().text}
                 </p>
-                <p 
+                <p
                   className="text-sm opacity-80"
                   style={{ color: theme.colors.textSecondary }}
                 >
@@ -806,24 +1036,23 @@ export default function Index() {
             </div>
           </div>
 
-          {/* Enhanced progress bar */}
           <div className="space-y-3">
-            <div 
+            <div
               className="w-full h-1 rounded-full overflow-hidden"
               style={{ backgroundColor: `${theme.colors.surface}80` }}
             >
-              <div 
+              <div
                 className="h-full transition-all duration-500 ease-out rounded-full relative overflow-hidden"
-                style={{ 
+                style={{
                   width: `${progress}%`,
                   background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-                  boxShadow: `0 0 20px ${theme.colors.primary}60`
+                  boxShadow: `0 0 20px ${theme.colors.primary}60`,
                 }}
               >
                 <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
               </div>
             </div>
-            
+
             <div className="flex justify-between items-center text-sm">
               <span style={{ color: theme.colors.textSecondary }}>
                 {progress.toFixed(1)}% Complete
@@ -838,35 +1067,33 @@ export default function Index() {
     );
   }
 
-  // ==================== ENHANCED TRANSITION SCREEN ====================
-  
   if (!showMain) {
     return (
-      <div 
+      <div
         className="min-h-screen flex items-center justify-center relative overflow-hidden"
-        style={{ 
+        style={{
           background: `radial-gradient(ellipse at center, ${theme.colors.background}dd 0%, ${theme.colors.background} 100%)`,
         }}
       >
         <div className="text-center space-y-4">
-          <div 
+          <div
             className="text-7xl font-bold tracking-wider animate-fadeIn"
-            style={{ 
+            style={{
               color: theme.colors.text,
               fontFamily: "Crimson Pro, serif",
               textShadow: `0 0 50px ${theme.colors.primary}40`,
-              animation: "fadeIn 1.5s ease-in-out"
+              animation: "fadeIn 1.5s ease-in-out",
             }}
           >
             Welcome
           </div>
-          <div 
+          <div
             className="text-xl tracking-wide animate-fadeIn"
-            style={{ 
+            style={{
               color: theme.colors.primary,
               animationDelay: "0.5s",
               opacity: 0,
-              animation: "fadeIn 1s ease-in-out 0.5s forwards"
+              animation: "fadeIn 1s ease-in-out 0.5s forwards",
             }}
           >
             to the experience
@@ -876,30 +1103,26 @@ export default function Index() {
     );
   }
 
-  // ==================== ENHANCED MAIN CONTENT ====================
-  
   return (
     <>
-      {/* Enhanced header with sophisticated typography */}
-      <header 
+      <header
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b"
-        style={{ 
+        style={{
           backgroundColor: `${theme.colors.background}90`,
-          borderColor: `${theme.colors.surface}40`
+          borderColor: `${theme.colors.surface}40`,
         }}
       >
         <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div 
+          <div
             className="text-2xl font-bold tracking-wide transition-colors duration-300"
-            style={{ 
+            style={{
               color: theme.colors.text,
-              fontFamily: "Crimson Pro, serif"
+              fontFamily: "Crimson Pro, serif",
             }}
           >
             Bentolio
           </div>
 
-          {/* Enhanced desktop navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {["Work", "About", "Skills", "Contact"].map((item) => (
               <button
@@ -909,7 +1132,7 @@ export default function Index() {
                 style={{ color: theme.colors.text }}
               >
                 {item}
-                <div 
+                <div
                   className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300 rounded-full"
                   style={{ backgroundColor: theme.colors.primary }}
                 />
@@ -917,33 +1140,31 @@ export default function Index() {
             ))}
           </div>
 
-          {/* Enhanced mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden w-6 h-6 flex flex-col justify-center space-y-1 transition-all duration-300"
           >
-            <span 
-              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}
+            <span
+              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`}
               style={{ backgroundColor: theme.colors.text }}
             />
-            <span 
-              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}
+            <span
+              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""}`}
               style={{ backgroundColor: theme.colors.text }}
             />
-            <span 
-              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}
+            <span
+              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
               style={{ backgroundColor: theme.colors.text }}
             />
           </button>
         </nav>
 
-        {/* Enhanced mobile menu */}
         {isMobileMenuOpen && (
-          <div 
+          <div
             className="md:hidden absolute top-full left-0 right-0 backdrop-blur-xl border-b transition-all duration-300"
-            style={{ 
+            style={{
               backgroundColor: `${theme.colors.background}95`,
-              borderColor: `${theme.colors.surface}40`
+              borderColor: `${theme.colors.surface}40`,
             }}
           >
             <div className="px-6 py-6 space-y-4">
@@ -962,72 +1183,372 @@ export default function Index() {
         )}
       </header>
 
-      {/* Enhanced main content with sophisticated spacing */}
-      <main 
+      <main
         className="min-h-screen pt-24 pb-16 px-6 transition-colors duration-500"
         style={{ backgroundColor: theme.colors.background }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-12 gap-6 auto-rows-max">
-            
             {/* Enhanced Hero Widget */}
             <div
-              ref={(el) => widgetRefs.current['hero'] = el}
+              ref={(el) => (widgetRefs.current["hero"] = el)}
               className="col-span-12 md:col-span-8 h-80 rounded-3xl p-8 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
               style={{ backgroundColor: theme.colors.hero }}
-              onClick={() => handleWidgetClick('hero')}
+              onClick={() => handleWidgetClick("hero")}
             >
-              {/* Enhanced decorative elements */}
-              <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 opacity-30 animate-spin group-hover:opacity-50 transition-opacity duration-300" 
-                   style={{ borderColor: theme.colors.primary, borderTopColor: "transparent" }}></div>
-              <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"
-                   style={{ backgroundColor: theme.colors.accent }}></div>
+              <div
+                className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 opacity-30 animate-spin group-hover:opacity-50 transition-opacity duration-300"
+                style={{
+                  borderColor: theme.colors.primary,
+                  borderTopColor: "transparent",
+                }}
+              ></div>
+              <div
+                className="absolute bottom-4 left-4 w-16 h-16 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                style={{ backgroundColor: theme.colors.accent }}
+              ></div>
 
-              {/* Enhanced typography */}
-              <h1 
+              <h1
                 className="text-6xl font-bold mb-4 transition-colors duration-300"
-                style={{ 
+                style={{
                   color: theme.colors.text,
                   fontFamily: "Crimson Pro, serif",
-                  lineHeight: "1.1"
+                  lineHeight: "1.1",
                 }}
               >
                 Creative
                 <br />
                 <span style={{ color: theme.colors.primary }}>Developer</span>
               </h1>
-              <p 
+              <p
                 className="text-lg mb-6 max-w-md transition-colors duration-300 leading-relaxed"
                 style={{ color: theme.colors.textSecondary }}
               >
-                Crafting extraordinary digital experiences through the perfect harmony 
-                of innovative design and cutting-edge technology.
+                Crafting extraordinary digital experiences through the perfect
+                harmony of innovative design and cutting-edge technology.
               </p>
-              <button 
+              <button
                 className="px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                style={{ 
+                style={{
                   background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
-                  color: theme.colors.background
+                  color: theme.colors.background,
                 }}
               >
                 Explore My Work →
               </button>
             </div>
 
-            {/* Add remaining widgets with similar enhancements... */}
-            
+            {/* Enhanced Profile Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["profile"] = el)}
+              className="col-span-12 md:col-span-4 h-80 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+              style={{ backgroundColor: theme.colors.profile }}
+              onClick={() => handleWidgetClick("profile")}
+            >
+              <div
+                className="w-24 h-24 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl"
+                style={{
+                  background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.accent})`,
+                }}
+              >
+                <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-12 h-12 text-gray-600"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                  </svg>
+                </div>
+              </div>
+              <h3
+                className="text-xl font-semibold mb-2 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Crimson Pro, serif",
+                }}
+              >
+                John Doe
+              </h3>
+              <p
+                className="text-sm transition-colors duration-300"
+                style={{ color: theme.colors.textSecondary }}
+              >
+                Senior Creative Developer specializing in React, TypeScript, and
+                modern web technologies.
+              </p>
+
+              <div className="absolute top-4 right-4">
+                <div
+                  className="w-3 h-3 rounded-full animate-pulse"
+                  style={{ backgroundColor: theme.colors.accent }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Enhanced About Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["about"] = el)}
+              className="col-span-12 md:col-span-6 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+              style={{ backgroundColor: theme.colors.about }}
+              onClick={() => handleWidgetClick("about")}
+            >
+              <svg
+                className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
+                fill="currentColor"
+                style={{ color: theme.colors.text }}
+                viewBox="0 0 24 24"
+              >
+                <path d="M14,17H17L19,13V7H13V13H16M6,17H9L11,13V7H5V13H8L6,17Z" />
+              </svg>
+
+              <h3
+                className="text-xl font-semibold mb-3 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Crimson Pro, serif",
+                }}
+              >
+                About Me
+              </h3>
+              <p
+                className="text-sm leading-relaxed transition-colors duration-300"
+                style={{ color: theme.colors.textSecondary }}
+              >
+                Passionate about creating digital experiences that bridge design
+                and technology. With over 8 years of experience, I help bring
+                ideas to life through elegant code and thoughtful design
+                decisions.
+              </p>
+            </div>
+
+            {/* Enhanced Skills Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["skills"] = el)}
+              className="col-span-12 md:col-span-3 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+              style={{ backgroundColor: theme.colors.skills }}
+              onClick={() => handleWidgetClick("skills")}
+            >
+              <h3
+                className="text-xl font-semibold mb-4 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Crimson Pro, serif",
+                }}
+              >
+                Skills
+              </h3>
+
+              <div className="space-y-3 relative">
+                {allSkills.slice(0, 5).map((skill, index) => (
+                  <div
+                    key={skill.name}
+                    className="flex justify-between items-center"
+                  >
+                    <span
+                      className="text-sm font-medium transition-colors duration-300"
+                      style={{ color: theme.colors.text }}
+                    >
+                      {skill.name.split(" ")[0]}
+                    </span>
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            i < Math.floor(skill.level / 20)
+                              ? "opacity-100"
+                              : "opacity-30"
+                          }`}
+                          style={{
+                            backgroundColor:
+                              i < Math.floor(skill.level / 20)
+                                ? theme.colors.primary
+                                : theme.colors.text,
+                            animationDelay: `${index * 100 + i * 50}ms`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(transparent, ${theme.colors.skills})`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Enhanced Location Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["location"] = el)}
+              className="col-span-12 md:col-span-3 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+              style={{ backgroundColor: theme.colors.location }}
+              onClick={() => handleWidgetClick("location")}
+            >
+              <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
+                🌍
+              </div>
+              <h3
+                className="text-lg font-semibold mb-2 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Crimson Pro, serif",
+                }}
+              >
+                Location
+              </h3>
+              <p
+                className="text-sm transition-colors duration-300"
+                style={{ color: theme.colors.textSecondary }}
+              >
+                San Francisco, CA
+              </p>
+              <p
+                className="text-xs mt-2 transition-colors duration-300"
+                style={{ color: theme.colors.textSecondary }}
+              >
+                Available for remote work worldwide
+              </p>
+
+              <div className="absolute bottom-4 right-4">
+                <div
+                  className="w-3 h-3 rounded-full animate-ping"
+                  style={{ backgroundColor: theme.colors.accent }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Enhanced Projects Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["projects"] = el)}
+              className="col-span-12 md:col-span-8 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+              style={{ backgroundColor: theme.colors.projects }}
+              onClick={() => handleWidgetClick("projects")}
+            >
+              <h3
+                className="text-2xl font-semibold mb-4 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Crimson Pro, serif",
+                }}
+              >
+                Recent Work
+              </h3>
+
+              <div className="grid grid-cols-3 gap-4">
+                {allProjects.slice(0, 3).map((project, index) => (
+                  <div
+                    key={project.id}
+                    className="group relative aspect-square rounded-lg overflow-hidden transition-all duration-300 hover:scale-105"
+                    style={{ backgroundColor: theme.colors.surfaceElevated }}
+                  >
+                    <div
+                      className="absolute inset-0 transition-all duration-300"
+                      style={{
+                        background: `linear-gradient(135deg, ${theme.colors.primary}20, ${theme.colors.accent}20)`,
+                      }}
+                    />
+                    <div className="absolute bottom-2 left-2 right-2">
+                      <h4
+                        className="text-xs font-medium truncate transition-colors duration-300"
+                        style={{ color: theme.colors.text }}
+                      >
+                        {project.name}
+                      </h4>
+                      <p
+                        className="text-xs truncate transition-colors duration-300"
+                        style={{ color: theme.colors.textSecondary }}
+                      >
+                        {project.tech[0]}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="absolute top-4 right-4 w-6 h-6 border-2 rounded-full animate-pulse"
+                style={{ borderColor: theme.colors.primary }}
+              ></div>
+            </div>
+
+            {/* Enhanced Contact Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["contact"] = el)}
+              className="col-span-12 md:col-span-4 h-60 rounded-3xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group"
+              style={{ backgroundColor: theme.colors.contact }}
+              onClick={() => handleWidgetClick("contact")}
+            >
+              <div className="text-4xl mb-4">✉️</div>
+              <h3
+                className="text-xl font-semibold mb-3 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Crimson Pro, serif",
+                }}
+              >
+                Get In Touch
+              </h3>
+              <p
+                className="text-sm mb-4 transition-colors duration-300"
+                style={{ color: theme.colors.textSecondary }}
+              >
+                Let's discuss your next project and create something amazing
+                together.
+              </p>
+
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-xs">
+                  <span>📧</span>
+                  <span style={{ color: theme.colors.textSecondary }}>
+                    hello@johndoe.dev
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <span>💼</span>
+                  <span style={{ color: theme.colors.textSecondary }}>
+                    LinkedIn
+                  </span>
+                </div>
+              </div>
+
+              <div className="absolute bottom-4 right-4">
+                <div
+                  className="w-8 h-6 border-2 rounded-sm relative transition-colors duration-300"
+                  style={{ borderColor: theme.colors.primary }}
+                >
+                  <div
+                    className="absolute inset-1 border"
+                    style={{ borderColor: theme.colors.primary }}
+                  ></div>
+                  <div
+                    className="absolute top-1 left-1 w-2 h-1 rounded"
+                    style={{ backgroundColor: theme.colors.accent }}
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Enhanced theme selector */}
         <div className="fixed bottom-6 right-6 z-40">
           {showThemeSelector && (
-            <div className="absolute bottom-full right-0 mb-4 p-6 rounded-3xl border backdrop-blur-xl animate-fadeIn"
-                 style={{ 
-                   backgroundColor: `${theme.colors.surface}90`,
-                   borderColor: `${theme.colors.surfaceElevated}60`
-                 }}>
-              <h4 className="text-sm font-semibold mb-4" style={{ color: theme.colors.text }}>
+            <div
+              className="absolute bottom-full right-0 mb-4 p-6 rounded-3xl border backdrop-blur-xl animate-fadeIn"
+              style={{
+                backgroundColor: `${theme.colors.surface}90`,
+                borderColor: `${theme.colors.surfaceElevated}60`,
+              }}
+            >
+              <h4
+                className="text-sm font-semibold mb-4"
+                style={{ color: theme.colors.text }}
+              >
                 Choose Your Aesthetic
               </h4>
               <div className="grid grid-cols-3 gap-3">
@@ -1040,21 +1561,29 @@ export default function Index() {
                   >
                     <div className="flex flex-col items-center space-y-2">
                       <div className="flex space-x-1">
-                        <div 
+                        <div
                           className="w-4 h-4 rounded-full transition-transform duration-200 group-hover:scale-110"
-                          style={{ backgroundColor: themeOption.colors.primary }}
+                          style={{
+                            backgroundColor: themeOption.colors.primary,
+                          }}
                         />
-                        <div 
+                        <div
                           className="w-4 h-4 rounded-full transition-transform duration-200 group-hover:scale-110"
                           style={{ backgroundColor: themeOption.colors.accent }}
                         />
                       </div>
-                      <span className="text-xs font-medium" style={{ color: theme.colors.text }}>
-                        {themeOption.name.split(' ')[0]}
+                      <span
+                        className="text-xs font-medium"
+                        style={{ color: theme.colors.text }}
+                      >
+                        {themeOption.name.split(" ")[0]}
                       </span>
                     </div>
                     {currentTheme === themeOption.id && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
+                      <div
+                        className="absolute -top-1 -right-1 w-3 h-3 rounded-full animate-pulse"
+                        style={{ backgroundColor: theme.colors.accent }}
+                      ></div>
                     )}
                   </button>
                 ))}
@@ -1065,9 +1594,9 @@ export default function Index() {
           <button
             onClick={() => setShowThemeSelector(!showThemeSelector)}
             className="w-16 h-16 rounded-full backdrop-blur-xl border transition-all duration-300 hover:scale-110 flex items-center justify-center group"
-            style={{ 
+            style={{
               backgroundColor: `${theme.colors.surface}80`,
-              borderColor: `${theme.colors.surfaceElevated}60`
+              borderColor: `${theme.colors.surfaceElevated}60`,
             }}
           >
             <svg
@@ -1111,7 +1640,12 @@ export default function Index() {
                 style={{ color: theme.colors.text }}
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
 
@@ -1120,7 +1654,6 @@ export default function Index() {
         </div>
       )}
 
-      {/* Enhanced custom styles */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:wght@400;500;600;700&display=swap');
         
