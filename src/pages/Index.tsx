@@ -465,7 +465,8 @@ const Index = () => {
    * @returns Optimized position and size for expanded widget
    */
   const getSmartGrowthStyle = () => {
-    if (!widgetPosition || !expandedWidget) return {};
+    if (!widgetPosition || !expandedWidget || typeof window === "undefined")
+      return {};
 
     const headerHeight = 80;
     const viewportWidth = window.innerWidth;
