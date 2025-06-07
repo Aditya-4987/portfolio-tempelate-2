@@ -229,10 +229,12 @@ const Index = () => {
   ];
 
   /**
-   * Get current active theme or fallback to default
+   * Get current active theme or fallback to default (memoized to prevent re-renders)
    */
-  const theme =
-    colorThemes.find((t) => t.id === currentTheme) || colorThemes[0];
+  const theme = useMemo(
+    () => colorThemes.find((t) => t.id === currentTheme) || colorThemes[0],
+    [currentTheme],
+  );
 
   // ==================== SAMPLE DATA ====================
 
