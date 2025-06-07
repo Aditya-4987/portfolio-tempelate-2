@@ -1801,7 +1801,7 @@ export default function Index() {
   return (
     <>
       {/* Custom CSS for oscillating animation */}
-      <style jsx>{`
+      <style>{`
         @keyframes oscillate {
           0%,
           100% {
