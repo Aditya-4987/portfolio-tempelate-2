@@ -561,12 +561,20 @@ const Index = () => {
   };
 
   /**
-   * MEMOIZED EXPANSION STYLE - Prevents infinite re-renders
-   *
-   * Recalculates only when dependencies change
+   * EXPANSION STYLE STATE - Calculated via useEffect to prevent re-render issues
    */
-  const expansionStyle = useMemo(() => {
-    return getSmartGrowthStyle();
+  const [expansionStyle, setExpansionStyle] = useState<React.CSSProperties>({});
+
+  /**
+   * CALCULATE EXPANSION STYLE - Runs in useEffect to avoid render loop
+   */
+  useEffect(() => {
+    if (expandedWidget && widgetPosition) {
+      const style = getSmartGrowthStyle();
+      setExpansionStyle(style);
+    } else {
+      setExpansionStyle({});
+    }
   }, [
     expandedWidget,
     widgetPosition?.top,
