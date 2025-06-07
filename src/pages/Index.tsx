@@ -1798,8 +1798,42 @@ const Index = () => {
           </button>
         </div>
 
-        {/* ==================== MODAL DISABLED FOR DEBUGGING ==================== */}
-        {/* Modal temporarily disabled to isolate infinite re-render issue */}
+        {/* ==================== SIMPLE EXPANSION MODAL ==================== */}
+        {expandedWidget && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div
+              className="relative w-full max-w-2xl max-h-[90vh] mx-4 rounded-2xl p-8 shadow-2xl overflow-y-auto"
+              style={{ backgroundColor: theme.colors.background }}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setExpandedWidget(null);
+                  setClickedWidget(null);
+                  setWidgetPosition(null);
+                }}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  style={{ color: theme.colors.text }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              {/* Expanded Content */}
+              {renderExpandedContent(expandedWidget)}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ==================== STATIC STYLES ==================== */}
