@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 
 /**
  * Perfect Bentolio Portfolio Website
- * Features smart directional widget expansion with sequential blur effects
+ * Features stable hover, unblurred header, and dynamic color themes
  */
 
 // Types for better organization
@@ -30,6 +30,25 @@ interface WidgetPosition {
   height: number;
 }
 
+interface ColorTheme {
+  id: string;
+  name: string;
+  colors: {
+    background: string;
+    primary: string;
+    secondary: string;
+    accent: string;
+    text: string;
+    hero: string;
+    profile: string;
+    about: string;
+    skills: string;
+    location: string;
+    projects: string;
+    contact: string;
+  };
+}
+
 const Index = () => {
   // ==================== STATE MANAGEMENT ====================
   const [progress, setProgress] = useState(0);
@@ -47,8 +66,111 @@ const Index = () => {
   );
   const [showBlur, setShowBlur] = useState(false);
 
+  // Color theme state
+  const [currentTheme, setCurrentTheme] = useState<string>("default");
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
+
   // Refs for widget elements
   const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // ==================== COLOR THEMES ====================
+
+  const colorThemes: ColorTheme[] = [
+    {
+      id: "default",
+      name: "Charcoal",
+      colors: {
+        background: "rgb(17, 18, 13)",
+        primary: "rgb(216, 207, 188)",
+        secondary: "rgb(180, 170, 150)",
+        accent: "rgb(150, 140, 120)",
+        text: "rgb(216, 207, 188)",
+        hero: "rgb(86, 84, 73)",
+        profile: "rgb(45, 46, 40)",
+        about: "rgb(35, 36, 30)",
+        skills: "rgb(55, 56, 50)",
+        location: "rgb(65, 66, 60)",
+        projects: "rgb(75, 76, 70)",
+        contact: "rgb(25, 26, 20)",
+      },
+    },
+    {
+      id: "ocean",
+      name: "Ocean",
+      colors: {
+        background: "rgb(12, 20, 31)",
+        primary: "rgb(176, 196, 222)",
+        secondary: "rgb(135, 160, 190)",
+        accent: "rgb(100, 130, 165)",
+        text: "rgb(176, 196, 222)",
+        hero: "rgb(52, 73, 94)",
+        profile: "rgb(34, 47, 62)",
+        about: "rgb(24, 37, 52)",
+        skills: "rgb(39, 55, 70)",
+        location: "rgb(44, 62, 80)",
+        projects: "rgb(58, 80, 107)",
+        contact: "rgb(19, 30, 45)",
+      },
+    },
+    {
+      id: "forest",
+      name: "Forest",
+      colors: {
+        background: "rgb(18, 25, 15)",
+        primary: "rgb(190, 207, 165)",
+        secondary: "rgb(155, 175, 135)",
+        accent: "rgb(125, 145, 110)",
+        text: "rgb(190, 207, 165)",
+        hero: "rgb(76, 84, 65)",
+        profile: "rgb(45, 52, 38)",
+        about: "rgb(35, 42, 28)",
+        skills: "rgb(55, 62, 48)",
+        location: "rgb(65, 72, 58)",
+        projects: "rgb(85, 95, 75)",
+        contact: "rgb(25, 32, 20)",
+      },
+    },
+    {
+      id: "sunset",
+      name: "Sunset",
+      colors: {
+        background: "rgb(25, 15, 18)",
+        primary: "rgb(207, 165, 190)",
+        secondary: "rgb(175, 135, 155)",
+        accent: "rgb(145, 110, 125)",
+        text: "rgb(207, 165, 190)",
+        hero: "rgb(84, 65, 76)",
+        profile: "rgb(52, 38, 45)",
+        about: "rgb(42, 28, 35)",
+        skills: "rgb(62, 48, 55)",
+        location: "rgb(72, 58, 65)",
+        projects: "rgb(95, 75, 85)",
+        contact: "rgb(32, 20, 25)",
+      },
+    },
+    {
+      id: "midnight",
+      name: "Midnight",
+      colors: {
+        background: "rgb(8, 8, 15)",
+        primary: "rgb(165, 165, 207)",
+        secondary: "rgb(135, 135, 175)",
+        accent: "rgb(110, 110, 145)",
+        text: "rgb(165, 165, 207)",
+        hero: "rgb(48, 48, 84)",
+        profile: "rgb(32, 32, 52)",
+        about: "rgb(22, 22, 42)",
+        skills: "rgb(38, 38, 62)",
+        location: "rgb(44, 44, 72)",
+        projects: "rgb(58, 58, 95)",
+        contact: "rgb(18, 18, 32)",
+      },
+    },
+  ];
+
+  // Get current theme colors
+  const theme =
+    colorThemes.find((t) => t.id === currentTheme) || colorThemes[0];
 
   // ==================== DATA STRUCTURES ====================
 
@@ -334,23 +456,21 @@ const Index = () => {
     };
   };
 
-  // Handle widget expansion
+  // Handle widget expansion with improved stability
   const handleWidgetInteraction = (
     widgetName: string,
     action: "hover" | "leave" | "click",
   ) => {
-    // Clear any existing timer
-    if (hoverTimer) {
-      clearTimeout(hoverTimer);
-      setHoverTimer(null);
-    }
-
     if (action === "click") {
       // Toggle on click
       if (clickedWidget === widgetName) {
         setClickedWidget(null);
         setExpandedWidget(null);
         setWidgetPosition(null);
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+          setHoverTimer(null);
+        }
       } else {
         const element = widgetRefs.current[widgetName];
         if (element) {
@@ -364,10 +484,15 @@ const Index = () => {
         }
         setClickedWidget(widgetName);
         setExpandedWidget(widgetName);
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+          setHoverTimer(null);
+        }
       }
     } else if (action === "hover") {
-      // Only expand on hover if not clicked
-      if (!clickedWidget) {
+      // Only expand on hover if not clicked and not already expanded
+      if (!clickedWidget && !expandedWidget) {
+        if (hoverTimer) clearTimeout(hoverTimer);
         const timer = setTimeout(() => {
           const element = widgetRefs.current[widgetName];
           if (element) {
@@ -384,12 +509,13 @@ const Index = () => {
         setHoverTimer(timer);
       }
     } else if (action === "leave") {
-      // Only collapse on leave if not clicked
-      if (!clickedWidget) {
+      // Only collapse on leave if not clicked and currently expanded via hover
+      if (!clickedWidget && expandedWidget === widgetName) {
+        if (hoverTimer) clearTimeout(hoverTimer);
         const timer = setTimeout(() => {
           setExpandedWidget(null);
           setWidgetPosition(null);
-        }, 300);
+        }, 500); // Increased delay for stability
         setHoverTimer(timer);
       }
     }
@@ -420,6 +546,12 @@ const Index = () => {
     }
   };
 
+  // Handle theme change
+  const handleThemeChange = (themeId: string) => {
+    setCurrentTheme(themeId);
+    setShowThemeSelector(false);
+  };
+
   // Check if widget is expanded
   const isWidgetExpanded = (widgetName: string) => {
     return expandedWidget === widgetName;
@@ -445,9 +577,9 @@ const Index = () => {
   // ==================== LOADING PHASES ====================
   const getLoadingContent = () => {
     const phases = [
-      { text: "INITIALIZING", dots: 3, color: "rgb(216, 207, 188)" },
-      { text: "BUILDING", dots: 4, color: "rgb(180, 170, 150)" },
-      { text: "FINALIZING", dots: 5, color: "rgb(150, 140, 120)" },
+      { text: "INITIALIZING", dots: 3, color: theme.colors.primary },
+      { text: "BUILDING", dots: 4, color: theme.colors.secondary },
+      { text: "FINALIZING", dots: 5, color: theme.colors.accent },
     ];
     return phases[loadingPhase];
   };
@@ -460,42 +592,42 @@ const Index = () => {
       <div>
         <label
           className="block text-xs font-medium mb-2 opacity-80"
-          style={{ color: "rgb(216, 207, 188)" }}
+          style={{ color: theme.colors.text }}
         >
           Name
         </label>
         <input
           type="text"
           className="w-full px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-sm focus:outline-none focus:border-white/40 transition-colors"
-          style={{ color: "rgb(216, 207, 188)" }}
+          style={{ color: theme.colors.text }}
           placeholder="Your name"
         />
       </div>
       <div>
         <label
           className="block text-xs font-medium mb-2 opacity-80"
-          style={{ color: "rgb(216, 207, 188)" }}
+          style={{ color: theme.colors.text }}
         >
           Email
         </label>
         <input
           type="email"
           className="w-full px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-sm focus:outline-none focus:border-white/40 transition-colors"
-          style={{ color: "rgb(216, 207, 188)" }}
+          style={{ color: theme.colors.text }}
           placeholder="your@email.com"
         />
       </div>
       <div>
         <label
           className="block text-xs font-medium mb-2 opacity-80"
-          style={{ color: "rgb(216, 207, 188)" }}
+          style={{ color: theme.colors.text }}
         >
           Message
         </label>
         <textarea
           rows={3}
           className="w-full px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-sm focus:outline-none focus:border-white/40 transition-colors resize-none"
-          style={{ color: "rgb(216, 207, 188)" }}
+          style={{ color: theme.colors.text }}
           placeholder="Your message..."
         />
       </div>
@@ -515,7 +647,7 @@ const Index = () => {
               <h3
                 className="text-2xl font-medium mb-4"
                 style={{
-                  color: "rgb(216, 207, 188)",
+                  color: theme.colors.text,
                   fontFamily: "Playfair Display, serif",
                 }}
               >
@@ -523,7 +655,7 @@ const Index = () => {
               </h3>
               <p
                 className="text-sm opacity-80 leading-relaxed mb-4"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 We believe in creating digital experiences that not only look
                 beautiful but solve real problems and create meaningful
@@ -534,13 +666,13 @@ const Index = () => {
             <div className="border-l-2 border-amber-500/30 pl-4">
               <h4
                 className="font-medium mb-3"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Our Services
               </h4>
               <ul
                 className="space-y-2 text-sm opacity-80"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <li>• Full-stack Web Development</li>
                 <li>• UI/UX Design & Prototyping</li>
@@ -575,13 +707,13 @@ const Index = () => {
               </div>
               <div
                 className="text-lg font-medium mb-1"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 John Doe
               </div>
               <div
                 className="text-xs opacity-70 mb-3"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Senior Creative Developer
               </div>
@@ -590,13 +722,13 @@ const Index = () => {
             <div className="border-l-2 border-amber-500/30 pl-4">
               <h4
                 className="font-medium mb-2"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Achievements
               </h4>
               <ul
                 className="space-y-1 text-xs opacity-80"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <li>🏆 Awwwards Site of the Day (2023)</li>
                 <li>🎖️ CSS Design Awards Winner</li>
@@ -608,13 +740,13 @@ const Index = () => {
             <div className="border-l-2 border-amber-500/30 pl-4">
               <h4
                 className="font-medium mb-2"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Certifications
               </h4>
               <ul
                 className="space-y-1 text-xs opacity-80"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <li>• AWS Solutions Architect</li>
                 <li>• Google UX Design Certificate</li>
@@ -634,7 +766,7 @@ const Index = () => {
             <h3
               className="text-xl font-medium mb-4"
               style={{
-                color: "rgb(216, 207, 188)",
+                color: theme.colors.text,
                 fontFamily: "Playfair Display, serif",
               }}
             >
@@ -642,7 +774,7 @@ const Index = () => {
             </h3>
             <p
               className="text-sm opacity-80 leading-relaxed"
-              style={{ color: "rgb(216, 207, 188)" }}
+              style={{ color: theme.colors.text }}
             >
               I'm a passionate creative developer with over 5 years of
               experience in crafting digital experiences that bridge the gap
@@ -652,13 +784,13 @@ const Index = () => {
             <div className="border-l-2 border-amber-500/30 pl-4">
               <h4
                 className="font-medium mb-2"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Experience Timeline
               </h4>
               <div
                 className="space-y-2 text-xs opacity-80"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <div className="flex justify-between">
                   <span>Senior Frontend Developer</span>
@@ -681,13 +813,13 @@ const Index = () => {
             <div className="border-l-2 border-amber-500/30 pl-4">
               <h4
                 className="font-medium mb-2"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Philosophy
               </h4>
               <p
                 className="text-xs opacity-80 leading-relaxed"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 I believe great software isn't just about code—it's about
                 understanding users, solving real problems, and creating
@@ -703,7 +835,7 @@ const Index = () => {
             <h3
               className="text-xl font-medium mb-4"
               style={{
-                color: "rgb(216, 207, 188)",
+                color: theme.colors.text,
                 fontFamily: "Playfair Display, serif",
               }}
             >
@@ -718,13 +850,13 @@ const Index = () => {
                   <div className="flex justify-between items-center mb-1">
                     <span
                       className="text-sm font-medium"
-                      style={{ color: "rgb(216, 207, 188)" }}
+                      style={{ color: theme.colors.text }}
                     >
                       {skill.name}
                     </span>
                     <span
                       className="text-xs opacity-60"
-                      style={{ color: "rgb(216, 207, 188)" }}
+                      style={{ color: theme.colors.text }}
                     >
                       {skill.level}%
                     </span>
@@ -743,13 +875,13 @@ const Index = () => {
 
                   <div
                     className="text-xs opacity-70"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     {skill.description}
                   </div>
                   <div
                     className="text-xs opacity-50 mt-1"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     {skill.category}
                   </div>
@@ -765,7 +897,7 @@ const Index = () => {
             <h3
               className="text-xl font-medium mb-4"
               style={{
-                color: "rgb(216, 207, 188)",
+                color: theme.colors.text,
                 fontFamily: "Playfair Display, serif",
               }}
             >
@@ -773,15 +905,12 @@ const Index = () => {
             </h3>
             <div className="text-center">
               <div className="text-4xl mb-2">🌍</div>
-              <div
-                className="font-medium"
-                style={{ color: "rgb(216, 207, 188)" }}
-              >
+              <div className="font-medium" style={{ color: theme.colors.text }}>
                 San Francisco, California
               </div>
               <div
                 className="text-xs opacity-70"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 United States
               </div>
@@ -791,13 +920,13 @@ const Index = () => {
               <div className="text-center p-3 bg-white/5 rounded-lg">
                 <div
                   className="text-xs opacity-70 mb-1"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   Local Time
                 </div>
                 <div
                   className="font-medium text-xs"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   {new Date().toLocaleTimeString("en-US", {
                     timeZone: "America/Los_Angeles",
@@ -808,13 +937,13 @@ const Index = () => {
               <div className="text-center p-3 bg-white/5 rounded-lg">
                 <div
                   className="text-xs opacity-70 mb-1"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   Time Zone
                 </div>
                 <div
                   className="font-medium text-xs"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   UTC-8
                 </div>
@@ -824,13 +953,13 @@ const Index = () => {
             <div className="border-l-2 border-amber-500/30 pl-4">
               <h4
                 className="font-medium mb-2"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Work Preferences
               </h4>
               <ul
                 className="space-y-1 text-xs opacity-80"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <li>🏠 Remote work available</li>
                 <li>🤝 On-site meetings in SF Bay Area</li>
@@ -847,7 +976,7 @@ const Index = () => {
             <h3
               className="text-xl font-medium mb-4"
               style={{
-                color: "rgb(216, 207, 188)",
+                color: theme.colors.text,
                 fontFamily: "Playfair Display, serif",
               }}
             >
@@ -862,13 +991,13 @@ const Index = () => {
                   <div className="w-full h-16 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-3"></div>
                   <h4
                     className="text-sm font-medium mb-2"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     {project.name}
                   </h4>
                   <p
                     className="text-xs opacity-70 mb-3 leading-relaxed"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     {project.description.slice(0, 80)}...
                   </p>
@@ -877,7 +1006,7 @@ const Index = () => {
                       <span
                         key={tech}
                         className="text-xs px-2 py-1 bg-white/10 rounded"
-                        style={{ color: "rgb(216, 207, 188)" }}
+                        style={{ color: theme.colors.text }}
                       >
                         {tech}
                       </span>
@@ -885,7 +1014,7 @@ const Index = () => {
                   </div>
                   <button
                     className="w-full py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-xs font-medium rounded hover:from-amber-500/40 hover:to-amber-600/40 transition-all duration-300"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     Visit Project →
                   </button>
@@ -901,7 +1030,7 @@ const Index = () => {
             <h3
               className="text-xl font-medium mb-4"
               style={{
-                color: "rgb(216, 207, 188)",
+                color: theme.colors.text,
                 fontFamily: "Playfair Display, serif",
               }}
             >
@@ -912,13 +1041,13 @@ const Index = () => {
             <div className="mt-6 pt-4 border-t border-white/10">
               <h4
                 className="text-sm font-medium mb-3"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 Other ways to reach me
               </h4>
               <div
                 className="space-y-2 text-xs"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <div className="flex items-center opacity-80">
                   <span className="mr-3">📧</span>
@@ -961,9 +1090,9 @@ const Index = () => {
       />
 
       <div
-        className="min-h-screen w-full overflow-hidden relative"
+        className="min-h-screen w-full overflow-hidden relative transition-colors duration-700"
         style={{
-          backgroundColor: "rgb(17, 18, 13)",
+          backgroundColor: theme.colors.background,
           fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
@@ -972,9 +1101,9 @@ const Index = () => {
           <div
             className="h-full transition-all duration-300 ease-out relative overflow-hidden"
             style={{
-              background: `linear-gradient(90deg, rgb(216, 207, 188) 0%, rgb(180, 170, 150) 50%, rgb(150, 140, 120) 100%)`,
+              background: `linear-gradient(90deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 50%, ${theme.colors.accent} 100%)`,
               width: `${progress}%`,
-              boxShadow: `0 0 20px rgba(216, 207, 188, 0.5)`,
+              boxShadow: `0 0 20px ${theme.colors.primary}`,
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
@@ -986,7 +1115,7 @@ const Index = () => {
           className={`fixed inset-0 z-40 transition-all duration-1000 ${
             showMain ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
-          style={{ backgroundColor: "rgb(17, 18, 13)" }}
+          style={{ backgroundColor: theme.colors.background }}
         >
           {/* Geometric Background Pattern */}
           <div className="absolute inset-0 opacity-5">
@@ -1085,50 +1214,51 @@ const Index = () => {
           </div>
         </div>
 
+        {/* ==================== HEADER SECTION (ALWAYS UNBLURRED) ==================== */}
+        <div
+          className={`fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 backdrop-blur-sm z-50 transition-colors duration-700`}
+          style={{ backgroundColor: `${theme.colors.background}99` }}
+        >
+          <div
+            className="text-3xl font-light tracking-wide relative group"
+            style={{
+              color: theme.colors.text,
+              fontFamily: "Playfair Display, serif",
+            }}
+          >
+            BENTOLIO
+            <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></div>
+          </div>
+
+          <div className="flex space-x-8">
+            {["ABOUT", "WORK", "CONTACT"].map((item) => (
+              <button
+                key={item}
+                onClick={() => handleNavClick(item)}
+                className="text-sm tracking-wider font-medium relative overflow-hidden transition-all duration-300 hover:scale-105 group"
+                style={{ color: theme.colors.text }}
+              >
+                <span className="relative z-10">{item}</span>
+                <div className="absolute inset-0 bg-white/10 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 origin-left rounded"></div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* ==================== MAIN PORTFOLIO CONTENT ==================== */}
         <div
-          className={`w-full p-[14px] min-h-screen transition-all duration-1000 ${
+          className={`w-full p-[14px] min-h-screen pt-28 transition-all duration-1000 ${
             showMain ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           } ${showBlur ? "blur-sm" : "blur-0"}`}
         >
           <div className="grid grid-cols-12 gap-[14px] min-h-screen relative z-10">
-            {/* ==================== HEADER SECTION (NO BLUR) ==================== */}
-            <div
-              className={`col-span-12 h-20 flex items-center justify-between px-6 backdrop-blur-sm relative z-50 ${showBlur ? "blur-0" : ""}`}
-            >
-              <div
-                className="text-3xl font-light tracking-wide relative group"
-                style={{
-                  color: "rgb(216, 207, 188)",
-                  fontFamily: "Playfair Display, serif",
-                }}
-              >
-                BENTOLIO
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></div>
-              </div>
-
-              <div className="flex space-x-8">
-                {["ABOUT", "WORK", "CONTACT"].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => handleNavClick(item)}
-                    className="text-sm tracking-wider font-medium relative overflow-hidden transition-all duration-300 hover:scale-105 group"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    <span className="relative z-10">{item}</span>
-                    <div className="absolute inset-0 bg-white/10 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 origin-left rounded"></div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* ==================== MAIN CONTENT GRID ==================== */}
             <div className="col-span-12 grid grid-cols-12 gap-[14px] pb-[14px]">
               {/* ==================== HERO SECTION ==================== */}
               <div
                 ref={(el) => (widgetRefs.current["hero"] = el)}
                 className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(86, 84, 73)" }}
+                style={{ backgroundColor: theme.colors.hero }}
                 onMouseEnter={() => handleWidgetInteraction("hero", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("hero", "leave")}
                 onClick={() => handleWidgetInteraction("hero", "click")}
@@ -1140,7 +1270,7 @@ const Index = () => {
                 <h1
                   className="text-6xl md:text-8xl font-light mb-4 group-hover:scale-105 transition-transform duration-300"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1149,7 +1279,7 @@ const Index = () => {
                 <h1
                   className="text-6xl md:text-8xl font-light mb-6 group-hover:scale-105 transition-transform duration-300"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1157,7 +1287,7 @@ const Index = () => {
                 </h1>
                 <p
                   className="text-lg opacity-80 max-w-md group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   Crafting digital experiences through innovative design and
                   development
@@ -1166,7 +1296,7 @@ const Index = () => {
                 <svg
                   className="absolute top-1/2 right-8 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
@@ -1176,7 +1306,7 @@ const Index = () => {
               <div
                 ref={(el) => (widgetRefs.current["profile"] = el)}
                 className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(45, 46, 40)" }}
+                style={{ backgroundColor: theme.colors.profile }}
                 onMouseEnter={() => handleWidgetInteraction("profile", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("profile", "leave")}
                 onClick={() => handleWidgetInteraction("profile", "click")}
@@ -1195,7 +1325,7 @@ const Index = () => {
                 <h3
                   className="text-xl font-medium mb-2"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1203,7 +1333,7 @@ const Index = () => {
                 </h3>
                 <p
                   className="text-sm opacity-70 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   UI/UX Designer & Developer
                 </p>
@@ -1212,7 +1342,7 @@ const Index = () => {
                   <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
                   <span
                     className="text-xs"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     Available for work
                   </span>
@@ -1223,7 +1353,7 @@ const Index = () => {
               <div
                 ref={(el) => (widgetRefs.current["about"] = el)}
                 className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(35, 36, 30)" }}
+                style={{ backgroundColor: theme.colors.about }}
                 onMouseEnter={() => handleWidgetInteraction("about", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("about", "leave")}
                 onClick={() => handleWidgetInteraction("about", "click")}
@@ -1231,7 +1361,7 @@ const Index = () => {
                 <svg
                   className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
                 </svg>
@@ -1239,7 +1369,7 @@ const Index = () => {
                 <h3
                   className="text-2xl font-light mb-4"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1247,7 +1377,7 @@ const Index = () => {
                 </h3>
                 <p
                   className="text-sm leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   I'm a passionate creative developer with over 5 years of
                   experience in crafting digital experiences. I specialize in
@@ -1259,7 +1389,7 @@ const Index = () => {
               <div
                 ref={(el) => (widgetRefs.current["skills"] = el)}
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(55, 56, 50)" }}
+                style={{ backgroundColor: theme.colors.skills }}
                 onMouseEnter={() => handleWidgetInteraction("skills", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("skills", "leave")}
                 onClick={() => handleWidgetInteraction("skills", "click")}
@@ -1267,7 +1397,7 @@ const Index = () => {
                 <h3
                   className="text-xl font-light mb-4"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1280,7 +1410,7 @@ const Index = () => {
                       key={skill.name}
                       className="flex items-center text-sm group-hover:translate-x-2 transition-all duration-300"
                       style={{
-                        color: "rgb(216, 207, 188)",
+                        color: theme.colors.text,
                         opacity: skill.opacity,
                       }}
                     >
@@ -1293,8 +1423,7 @@ const Index = () => {
                   <div
                     className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
                     style={{
-                      background:
-                        "linear-gradient(to bottom, transparent, rgb(55, 56, 50))",
+                      background: `linear-gradient(to bottom, transparent, ${theme.colors.skills})`,
                     }}
                   />
                 </div>
@@ -1304,7 +1433,7 @@ const Index = () => {
               <div
                 ref={(el) => (widgetRefs.current["location"] = el)}
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(65, 66, 60)" }}
+                style={{ backgroundColor: theme.colors.location }}
                 onMouseEnter={() =>
                   handleWidgetInteraction("location", "hover")
                 }
@@ -1319,7 +1448,7 @@ const Index = () => {
                 <h3
                   className="text-lg font-light mb-2"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1327,13 +1456,13 @@ const Index = () => {
                 </h3>
                 <p
                   className="text-sm opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   San Francisco, CA
                 </p>
                 <div
                   className="mt-3 text-xs opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   UTC-8 (PST)
                 </div>
@@ -1346,7 +1475,7 @@ const Index = () => {
               <div
                 ref={(el) => (widgetRefs.current["projects"] = el)}
                 className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(75, 76, 70)" }}
+                style={{ backgroundColor: theme.colors.projects }}
                 onMouseEnter={() =>
                   handleWidgetInteraction("projects", "hover")
                 }
@@ -1358,7 +1487,7 @@ const Index = () => {
                 <h3
                   className="text-2xl font-light mb-4"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1375,13 +1504,13 @@ const Index = () => {
                       <div>
                         <div
                           className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
-                          style={{ color: "rgb(216, 207, 188)" }}
+                          style={{ color: theme.colors.text }}
                         >
                           {project.name}
                         </div>
                         <div
                           className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
-                          style={{ color: "rgb(216, 207, 188)" }}
+                          style={{ color: theme.colors.text }}
                         >
                           {project.tech.slice(0, 2).join(", ")}
                         </div>
@@ -1395,7 +1524,7 @@ const Index = () => {
               <div
                 ref={(el) => (widgetRefs.current["contact"] = el)}
                 className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(25, 26, 20)" }}
+                style={{ backgroundColor: theme.colors.contact }}
                 onMouseEnter={() => handleWidgetInteraction("contact", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("contact", "leave")}
                 onClick={() => handleWidgetInteraction("contact", "click")}
@@ -1404,7 +1533,7 @@ const Index = () => {
                   className="absolute top-4 right-4 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="none"
                   stroke="currentColor"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   <path
                     strokeLinecap="round"
@@ -1417,7 +1546,7 @@ const Index = () => {
                 <h3
                   className="text-xl font-light mb-4"
                   style={{
-                    color: "rgb(216, 207, 188)",
+                    color: theme.colors.text,
                     fontFamily: "Playfair Display, serif",
                   }}
                 >
@@ -1428,7 +1557,7 @@ const Index = () => {
                   <a
                     href="#"
                     className="block text-sm opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-2 group/email"
-                    style={{ color: "rgb(216, 207, 188)" }}
+                    style={{ color: theme.colors.text }}
                   >
                     <span className="group-hover/email:underline">
                       hello@johndoe.dev
@@ -1444,7 +1573,7 @@ const Index = () => {
                         key={social.name}
                         href="#"
                         className="text-xs opacity-60 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:-translate-y-1 flex items-center space-x-1"
-                        style={{ color: "rgb(216, 207, 188)" }}
+                        style={{ color: theme.colors.text }}
                       >
                         <span>{social.icon}</span>
                         <span>{social.name}</span>
@@ -1455,13 +1584,79 @@ const Index = () => {
 
                 <div
                   className="mt-4 text-xs opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  style={{ color: theme.colors.text }}
                 >
                   Usually responds within 24h
                 </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ==================== COLOR THEME SWITCHER ==================== */}
+        <div className="fixed bottom-6 right-6 z-50">
+          {/* Theme Selector Panel */}
+          {showThemeSelector && (
+            <div className="absolute bottom-16 right-0 bg-black/80 backdrop-blur-md rounded-2xl p-4 min-w-64 border border-white/10">
+              <h3 className="text-sm font-medium mb-3 text-white">
+                Choose Theme
+              </h3>
+              <div className="grid grid-cols-1 gap-2">
+                {colorThemes.map((themeOption) => (
+                  <button
+                    key={themeOption.id}
+                    onClick={() => handleThemeChange(themeOption.id)}
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 hover:bg-white/10 ${
+                      currentTheme === themeOption.id ? "bg-white/20" : ""
+                    }`}
+                  >
+                    <div className="flex space-x-1">
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{
+                          backgroundColor: themeOption.colors.background,
+                        }}
+                      />
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: themeOption.colors.hero }}
+                      />
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: themeOption.colors.primary }}
+                      />
+                    </div>
+                    <span className="text-sm text-white">
+                      {themeOption.name}
+                    </span>
+                    {currentTheme === themeOption.id && (
+                      <div className="ml-auto w-2 h-2 rounded-full bg-green-400"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Theme Button */}
+          <button
+            onClick={() => setShowThemeSelector(!showThemeSelector)}
+            className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-black/80"
+          >
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* ==================== SMART EXPANSION OVERLAY ==================== */}
@@ -1471,21 +1666,21 @@ const Index = () => {
             style={{
               backgroundColor:
                 expandedWidget === "hero"
-                  ? "rgb(86, 84, 73)"
+                  ? theme.colors.hero
                   : expandedWidget === "profile"
-                    ? "rgb(45, 46, 40)"
+                    ? theme.colors.profile
                     : expandedWidget === "about"
-                      ? "rgb(35, 36, 30)"
+                      ? theme.colors.about
                       : expandedWidget === "skills"
-                        ? "rgb(55, 56, 50)"
+                        ? theme.colors.skills
                         : expandedWidget === "location"
-                          ? "rgb(65, 66, 60)"
+                          ? theme.colors.location
                           : expandedWidget === "projects"
-                            ? "rgb(75, 76, 70)"
+                            ? theme.colors.projects
                             : expandedWidget === "contact"
-                              ? "rgb(25, 26, 20)"
-                              : "rgb(45, 46, 40)",
-              border: "1px solid rgba(216, 207, 188, 0.2)",
+                              ? theme.colors.contact
+                              : theme.colors.profile,
+              border: `1px solid ${theme.colors.primary}20`,
               ...getSmartGrowthStyle(),
             }}
           >
@@ -1502,7 +1697,7 @@ const Index = () => {
                 className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
-                style={{ color: "rgb(216, 207, 188)" }}
+                style={{ color: theme.colors.text }}
               >
                 <path
                   strokeLinecap="round"
