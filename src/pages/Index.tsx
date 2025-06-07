@@ -483,26 +483,28 @@ const Index = () => {
   }, [expandedWidget, theme.colors]);
 
   /**
-   * STABLE EXPANSION STYLE - Calculate only when absolutely necessary
+   * STABLE EXPANSION STYLE - Static dimensions to prevent any re-render loops
    */
-  const getStableExpansionStyle = () => {
-    if (!expandedWidget || !widgetPosition || typeof window === "undefined") {
+  const getStableExpansionStyle = useMemo(() => {
+    if (!expandedWidget || !widgetPosition) {
       return {};
     }
 
-    // Use static dimensions to prevent re-render loops
+    // Use completely static, predictable dimensions
     const baseStyle = {
       position: "fixed" as const,
-      top: Math.max(100, widgetPosition.top - 50),
-      left: Math.max(20, widgetPosition.left - 50),
-      width: Math.min(600, window.innerWidth - 40),
-      height: Math.min(500, window.innerHeight - 140),
+      top: Math.max(80, widgetPosition.top - 30),
+      left: Math.max(20, widgetPosition.left - 30),
+      width: 580, // Fixed width
+      height: 480, // Fixed height
+      maxWidth: "calc(100vw - 40px)",
+      maxHeight: "calc(100vh - 120px)",
       transform: "scale(1)",
       transformOrigin: "center center",
     };
 
     return baseStyle;
-  };
+  }, [expandedWidget, widgetPosition?.top, widgetPosition?.left]);
 
   /**
    * IMPROVED WIDGET INTERACTION HANDLER
