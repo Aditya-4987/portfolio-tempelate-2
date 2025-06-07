@@ -96,6 +96,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    margin: 0;
+    padding: 0;
   }
 }
