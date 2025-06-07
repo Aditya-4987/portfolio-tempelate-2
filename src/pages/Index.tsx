@@ -115,7 +115,7 @@ const Index = () => {
    * - currentTheme: active theme ID
    * - showThemeSelector: theme picker visibility
    */
-  const [currentTheme, setCurrentTheme] = useState<string>('default');
+  const [currentTheme, setCurrentTheme] = useState<string>("default");
   const [showThemeSelector, setShowThemeSelector] = useState(false);
 
   /**
@@ -655,9 +655,9 @@ const Index = () => {
    */
   const handleNavClick = (section: string) => {
     const widgetMap: { [key: string]: string } = {
-      'ABOUT': 'about',
-      'WORK': 'projects',
-      'CONTACT': 'contact'
+      ABOUT: "about",
+      WORK: "projects",
+      CONTACT: "contact",
     };
 
     const targetWidget = widgetMap[section];
@@ -669,7 +669,7 @@ const Index = () => {
           top: rect.top,
           left: rect.left,
           width: rect.width,
-          height: rect.height
+          height: rect.height,
         });
       }
       setClickedWidget(targetWidget);
@@ -746,7 +746,7 @@ const Index = () => {
           top: rect.top,
           left: rect.left,
           width: rect.width,
-          height: rect.height
+          height: rect.height,
         });
       }
       setClickedWidget(widgetName);
@@ -1399,13 +1399,16 @@ const Index = () => {
         </div>
 
         {/* ==================== RESPONSIVE HEADER (ALWAYS UNBLURRED) ==================== */}
-        <div className={`fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 backdrop-blur-sm z-50 transition-colors duration-700`} style={{ backgroundColor: `${theme.colors.background}dd` }}>
+        <div
+          className={`fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 backdrop-blur-sm z-50 transition-colors duration-700`}
+          style={{ backgroundColor: `${theme.colors.background}dd` }}
+        >
           {/* Brand Logo */}
           <div
             className="text-3xl font-light tracking-wide relative group"
             style={{
               color: theme.colors.text,
-              fontFamily: 'Playfair Display, serif'
+              fontFamily: "Playfair Display, serif",
             }}
           >
             BENTOLIO
@@ -1415,7 +1418,7 @@ const Index = () => {
 
           {/* Desktop Navigation Menu - Hidden on mobile */}
           <div className="hidden md:flex space-x-8">
-            {['ABOUT', 'WORK', 'CONTACT'].map((item) => (
+            {["ABOUT", "WORK", "CONTACT"].map((item) => (
               <button
                 key={item}
                 onClick={() => handleNavClick(item)}
@@ -1435,11 +1438,26 @@ const Index = () => {
             className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-200 hover:bg-white/10"
             style={{ color: theme.colors.text }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               {showMobileMenu ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               )}
             </svg>
           </button>
@@ -1460,7 +1478,7 @@ const Index = () => {
               style={{ backgroundColor: theme.colors.background }}
             >
               <div className="space-y-4">
-                {['ABOUT', 'WORK', 'CONTACT'].map((item) => (
+                {["ABOUT", "WORK", "CONTACT"].map((item) => (
                   <button
                     key={item}
                     onClick={() => handleNavClick(item)}
@@ -1486,11 +1504,10 @@ const Index = () => {
             <div className="col-span-12 grid grid-cols-12 gap-[14px] pb-[14px]">
               {/* HERO SECTION - Large feature card */}
               <div
-                ref={(el) => widgetRefs.current['hero'] = el}
+                ref={(el) => (widgetRefs.current["hero"] = el)}
                 className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: theme.colors.hero }}
-                onClick={() => handleWidgetClick('hero')}
-              >
+                onClick={() => handleWidgetClick("hero")}
               >
                 {/* Decorative Elements */}
                 <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white/10 animate-spin"></div>
@@ -1535,11 +1552,10 @@ const Index = () => {
 
               {/* PROFILE CARD - Personal information */}
               <div
-                ref={(el) => widgetRefs.current['profile'] = el}
+                ref={(el) => (widgetRefs.current["profile"] = el)}
                 className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: theme.colors.profile }}
-                onClick={() => handleWidgetClick('profile')}
-              >
+                onClick={() => handleWidgetClick("profile")}
               >
                 {/* Profile Avatar */}
                 <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl">
@@ -1585,11 +1601,10 @@ const Index = () => {
 
               {/* ABOUT SECTION - Personal story */}
               <div
-                ref={(el) => widgetRefs.current['about'] = el}
+                ref={(el) => (widgetRefs.current["about"] = el)}
                 className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: theme.colors.about }}
-                onClick={() => handleWidgetClick('about')}
-              >
+                onClick={() => handleWidgetClick("about")}
               >
                 {/* Quote mark decoration */}
                 <svg
@@ -1621,11 +1636,10 @@ const Index = () => {
 
               {/* SKILLS SECTION - Technical expertise */}
               <div
-                ref={(el) => widgetRefs.current['skills'] = el}
+                ref={(el) => (widgetRefs.current["skills"] = el)}
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: theme.colors.skills }}
-                onClick={() => handleWidgetClick('skills')}
-              >
+                onClick={() => handleWidgetClick("skills")}
               >
                 <h3
                   className="text-xl font-light mb-4"
@@ -1665,11 +1679,10 @@ const Index = () => {
 
               {/* LOCATION CARD - Geographic info */}
               <div
-                ref={(el) => widgetRefs.current['location'] = el}
+                ref={(el) => (widgetRefs.current["location"] = el)}
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: theme.colors.location }}
-                onClick={() => handleWidgetClick('location')}
-              >
+                onClick={() => handleWidgetClick("location")}
               >
                 <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
                   🌍
@@ -1703,11 +1716,10 @@ const Index = () => {
 
               {/* PROJECTS SECTION - Portfolio showcase */}
               <div
-                ref={(el) => widgetRefs.current['projects'] = el}
+                ref={(el) => (widgetRefs.current["projects"] = el)}
                 className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
                 style={{ backgroundColor: theme.colors.projects }}
-                onClick={() => handleWidgetClick('projects')}
-              >
+                onClick={() => handleWidgetClick("projects")}
               >
                 <h3
                   className="text-2xl font-light mb-4"
