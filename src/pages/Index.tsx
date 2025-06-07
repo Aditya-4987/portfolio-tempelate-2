@@ -560,6 +560,15 @@ const Index = () => {
   };
 
   /**
+   * MEMOIZED EXPANSION STYLE - Prevents infinite re-renders
+   *
+   * Recalculates only when dependencies change
+   */
+  const expansionStyle = useMemo(() => {
+    return getSmartGrowthStyle();
+  }, [expandedWidget, widgetPosition]);
+
+  /**
    * IMPROVED WIDGET INTERACTION HANDLER
    *
    * Manages hover and click interactions with enhanced stability:
