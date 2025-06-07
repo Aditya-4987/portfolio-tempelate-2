@@ -251,6 +251,90 @@ const colorThemes: ColorTheme[] = [
       surfaceElevated: "rgb(42, 42, 65)",
     },
   },
+  {
+    id: "lavender",
+    name: "Lavender Dreams",
+    description: "Soft lavender with ethereal purple undertones",
+    colors: {
+      background: "rgb(25, 20, 35)",
+      text: "rgb(252, 248, 255)",
+      textSecondary: "rgb(221, 214, 254)",
+      primary: "rgb(196, 181, 253)",
+      accent: "rgb(251, 146, 60)",
+      hero: "rgb(35, 28, 48)",
+      profile: "rgb(42, 34, 58)",
+      about: "rgb(38, 30, 52)",
+      skills: "rgb(48, 38, 65)",
+      location: "rgb(40, 32, 55)",
+      projects: "rgb(45, 36, 62)",
+      contact: "rgb(32, 25, 45)",
+      surface: "rgb(42, 34, 58)",
+      surfaceElevated: "rgb(55, 45, 75)",
+    },
+  },
+  {
+    id: "amber",
+    name: "Amber Sunset",
+    description: "Warm amber glow with golden sunset hues",
+    colors: {
+      background: "rgb(35, 28, 18)",
+      text: "rgb(255, 252, 245)",
+      textSecondary: "rgb(254, 243, 199)",
+      primary: "rgb(245, 158, 11)",
+      accent: "rgb(239, 68, 68)",
+      hero: "rgb(45, 36, 24)",
+      profile: "rgb(55, 44, 30)",
+      about: "rgb(48, 38, 26)",
+      skills: "rgb(62, 50, 34)",
+      location: "rgb(52, 42, 28)",
+      projects: "rgb(58, 46, 32)",
+      contact: "rgb(42, 33, 22)",
+      surface: "rgb(55, 44, 30)",
+      surfaceElevated: "rgb(70, 56, 38)",
+    },
+  },
+  {
+    id: "sage",
+    name: "Sage Harmony",
+    description: "Muted sage green with calming earth tones",
+    colors: {
+      background: "rgb(22, 32, 28)",
+      text: "rgb(248, 252, 250)",
+      textSecondary: "rgb(209, 250, 229)",
+      primary: "rgb(134, 239, 172)",
+      accent: "rgb(251, 146, 60)",
+      hero: "rgb(30, 42, 36)",
+      profile: "rgb(38, 52, 45)",
+      about: "rgb(34, 46, 40)",
+      skills: "rgb(45, 60, 52)",
+      location: "rgb(36, 50, 43)",
+      projects: "rgb(42, 56, 48)",
+      contact: "rgb(28, 40, 34)",
+      surface: "rgb(38, 52, 45)",
+      surfaceElevated: "rgb(50, 68, 58)",
+    },
+  },
+  {
+    id: "steel",
+    name: "Steel Blue",
+    description: "Sophisticated steel blue with metallic accents",
+    colors: {
+      background: "rgb(18, 25, 35)",
+      text: "rgb(248, 250, 252)",
+      textSecondary: "rgb(203, 213, 225)",
+      primary: "rgb(125, 211, 252)",
+      accent: "rgb(168, 85, 247)",
+      hero: "rgb(25, 35, 48)",
+      profile: "rgb(32, 45, 62)",
+      about: "rgb(28, 40, 55)",
+      skills: "rgb(38, 52, 70)",
+      location: "rgb(30, 42, 58)",
+      projects: "rgb(35, 48, 65)",
+      contact: "rgb(22, 32, 45)",
+      surface: "rgb(32, 45, 62)",
+      surfaceElevated: "rgb(42, 58, 80)",
+    },
+  },
 ];
 
 export default function Index() {
@@ -1735,43 +1819,43 @@ export default function Index() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Pro:wght@400;500;600;700&display=swap');
-        
+
         * {
           font-family: 'Inter', sans-serif;
         }
-        
+
         .animate-fadeIn {
           animation: fadeIn 0.6s ease-out;
         }
-        
+
         .animate-slideIn {
           animation: slideIn 0.4s ease-out;
         }
-        
+
         .animate-fadeInScale {
           animation: fadeInScale 0.5s ease-out;
         }
-        
+
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(15px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        
+
         @keyframes slideIn {
           from { opacity: 0; transform: scale(0.96) translateY(15px); }
           to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        
+
         @keyframes fadeInScale {
           from { opacity: 0; transform: scale(0.9); }
           to { opacity: 1; transform: scale(1); }
         }
-        
+
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-        
+
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
