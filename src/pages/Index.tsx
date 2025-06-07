@@ -1,11 +1,28 @@
 import { useEffect, useState, useRef } from "react";
 
 /**
- * Perfect Bentolio Portfolio Website
- * Features stable hover, unblurred header, and dynamic color themes
+ * BENTOLIO PORTFOLIO WEBSITE
+ *
+ * A sophisticated portfolio website featuring:
+ * - Smart widget expansion system with hover and click interactions
+ * - Dynamic color theme switching with 5 beautiful themes
+ * - Intelligent directional growth that respects viewport boundaries
+ * - Sequential blur effects for enhanced focus
+ * - Comprehensive loading animation with multiple phases
+ *
+ * Key Features:
+ * - Stable hover interactions with proper timer management
+ * - Content-aware expansion sizing to eliminate empty spaces
+ * - Header always stays visible and unblurred
+ * - Smooth color transitions across all elements
+ * - Professional animations and micro-interactions
  */
 
-// Types for better organization
+// ==================== TYPE DEFINITIONS ====================
+
+/**
+ * Skill data structure with proficiency levels and descriptions
+ */
 interface Skill {
   name: string;
   level: number;
@@ -13,6 +30,9 @@ interface Skill {
   category: string;
 }
 
+/**
+ * Project data structure with comprehensive project information
+ */
 interface Project {
   id: number;
   name: string;
@@ -23,6 +43,9 @@ interface Project {
   featured: boolean;
 }
 
+/**
+ * Widget position tracking for expansion calculations
+ */
 interface WidgetPosition {
   top: number;
   left: number;
@@ -30,6 +53,9 @@ interface WidgetPosition {
   height: number;
 }
 
+/**
+ * Color theme definition with all necessary color values
+ */
 interface ColorTheme {
   id: string;
   name: string;
@@ -49,14 +75,32 @@ interface ColorTheme {
   };
 }
 
+// ==================== MAIN COMPONENT ====================
+
 const Index = () => {
   // ==================== STATE MANAGEMENT ====================
+
+  /**
+   * Loading animation states
+   * - progress: 0-100 loading percentage
+   * - isLoaded: when loading completes
+   * - showMain: when to reveal main content
+   * - loadingPhase: current loading phase (0: init, 1: building, 2: finalizing)
+   */
   const [progress, setProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showMain, setShowMain] = useState(false);
   const [loadingPhase, setLoadingPhase] = useState(0);
 
-  // Widget expansion states
+  /**
+   * Widget expansion states
+   * - expandedWidget: currently expanded widget name
+   * - clickedWidget: widget expanded via click (persists until manually closed)
+   * - hoverTimer: timer for hover delay management
+   * - skillAnimations: trigger for skill progress bar animations
+   * - widgetPosition: original position of expanding widget
+   * - showBlur: controls background blur effect
+   */
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const [clickedWidget, setClickedWidget] = useState<string | null>(null);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
@@ -66,15 +110,25 @@ const Index = () => {
   );
   const [showBlur, setShowBlur] = useState(false);
 
-  // Color theme state
+  /**
+   * Color theme states
+   * - currentTheme: active theme ID
+   * - showThemeSelector: theme picker visibility
+   */
   const [currentTheme, setCurrentTheme] = useState<string>("default");
   const [showThemeSelector, setShowThemeSelector] = useState(false);
 
-  // Refs for widget elements
+  /**
+   * Widget DOM element references for position calculations
+   */
   const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // ==================== COLOR THEMES ====================
+  // ==================== COLOR THEME DEFINITIONS ====================
 
+  /**
+   * Five carefully crafted color themes
+   * Each theme maintains consistent contrast and visual hierarchy
+   */
   const colorThemes: ColorTheme[] = [
     {
       id: "default",
@@ -168,12 +222,18 @@ const Index = () => {
     },
   ];
 
-  // Get current theme colors
+  /**
+   * Get current active theme or fallback to default
+   */
   const theme =
     colorThemes.find((t) => t.id === currentTheme) || colorThemes[0];
 
-  // ==================== DATA STRUCTURES ====================
+  // ==================== SAMPLE DATA ====================
 
+  /**
+   * Skills data with realistic proficiency levels and descriptions
+   * Organized by category for better presentation
+   */
   const allSkills: Skill[] = [
     {
       name: "React",
@@ -237,6 +297,10 @@ const Index = () => {
     },
   ];
 
+  /**
+   * Project portfolio with diverse technology stacks
+   * Featured projects show in main grid, others in expanded view
+   */
   const allProjects: Project[] = [
     {
       id: 1,
@@ -300,14 +364,17 @@ const Index = () => {
     },
   ];
 
-  // ==================== EFFECTS ====================
+  // ==================== EFFECTS & LIFECYCLE ====================
 
-  // Sophisticated loading progress simulation
+  /**
+   * Sophisticated multi-phase loading animation
+   * Creates a professional loading experience with smooth transitions
+   */
   useEffect(() => {
     const phases = [
-      { duration: 2000, increment: 0.5 },
-      { duration: 1500, increment: 1.5 },
-      { duration: 1000, increment: 3 },
+      { duration: 2000, increment: 0.5 }, // Initializing phase
+      { duration: 1500, increment: 1.5 }, // Building phase
+      { duration: 1000, increment: 3 }, // Finalizing phase
     ];
 
     let currentPhase = 0;
@@ -317,6 +384,7 @@ const Index = () => {
       const phase = phases[currentPhase];
       phaseProgress += phase.increment + Math.random() * 1;
 
+      // Phase transition logic
       if (currentPhase === 0 && phaseProgress >= 25) {
         setLoadingPhase(1);
         currentPhase = 1;
@@ -329,6 +397,7 @@ const Index = () => {
 
       setProgress(Math.min(phaseProgress, 100));
 
+      // Complete loading sequence
       if (phaseProgress >= 100) {
         clearInterval(timer);
         setTimeout(() => {
@@ -341,7 +410,10 @@ const Index = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Trigger skill animations when skills widget expands
+  /**
+   * Skills animation trigger
+   * Delays progress bar animations until after expansion completes
+   */
   useEffect(() => {
     if (expandedWidget === "skills") {
       setTimeout(() => setSkillAnimations(true), 300);
@@ -350,20 +422,24 @@ const Index = () => {
     }
   }, [expandedWidget]);
 
-  // Handle blur effect after expansion completes
+  /**
+   * Sequential blur effect
+   * Applies blur only after widget expansion animation completes
+   */
   useEffect(() => {
     if (expandedWidget) {
-      // Start blur after expansion animation completes
       const timer = setTimeout(() => {
         setShowBlur(true);
-      }, 600); // 600ms for expansion + 100ms buffer
+      }, 600); // Wait for expansion animation (500ms) + buffer
       return () => clearTimeout(timer);
     } else {
       setShowBlur(false);
     }
   }, [expandedWidget]);
 
-  // Cleanup timer on unmount
+  /**
+   * Cleanup timers on unmount to prevent memory leaks
+   */
   useEffect(() => {
     return () => {
       if (hoverTimer) clearTimeout(hoverTimer);
@@ -372,18 +448,39 @@ const Index = () => {
 
   // ==================== HELPER FUNCTIONS ====================
 
-  // Calculate smart directional growth
+  /**
+   * SMART CONTENT-AWARE EXPANSION CALCULATOR
+   *
+   * Calculates optimal expansion size based on:
+   * - Content requirements (no empty space)
+   * - Viewport boundaries (intelligent directional growth)
+   * - Original widget position and size
+   *
+   * @returns Optimized position and size for expanded widget
+   */
   const getSmartGrowthStyle = () => {
-    if (!widgetPosition) return {};
+    if (!widgetPosition || !expandedWidget) return {};
 
-    const headerHeight = 80; // Header height
+    const headerHeight = 80;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const margin = 20; // Margin from edges
-
+    const margin = 20;
     const originalRect = widgetPosition;
 
-    // Determine constraints based on position
+    // Content-based height calculations (no more empty space!)
+    const contentHeights: { [key: string]: number } = {
+      hero: 400, // Mission + services + button
+      profile: 450, // Avatar + achievements + certifications
+      about: 350, // Bio + timeline + philosophy
+      skills: 420, // All skills with progress bars
+      location: 300, // Location + time + preferences
+      projects: 480, // All projects in 2-column grid
+      contact: 500, // Contact form + alternative methods
+    };
+
+    const contentHeight = contentHeights[expandedWidget] || 400;
+
+    // Boundary detection
     const touchesTop = originalRect.top <= headerHeight + margin;
     const touchesLeft = originalRect.left <= margin;
     const touchesRight =
@@ -391,52 +488,52 @@ const Index = () => {
     const touchesBottom =
       originalRect.top + originalRect.height >= viewportHeight - margin;
 
-    // Calculate expansion directions
+    // Expansion direction calculations
     let expandLeft = true;
     let expandRight = true;
     let expandUp = true;
     let expandDown = true;
 
-    // Apply constraints
+    // Apply boundary constraints
     if (touchesLeft) expandLeft = false;
     if (touchesRight) expandRight = false;
     if (touchesTop) expandUp = false;
     if (touchesBottom) expandDown = false;
 
-    // Calculate new dimensions and position
-    const baseExpansion = 200; // Base expansion amount
+    // Calculate optimal dimensions
+    const baseWidthExpansion = 180;
     let newWidth = originalRect.width;
-    let newHeight = originalRect.height + 200; // Always expand height for content
+    let newHeight = contentHeight; // Use content-specific height
     let newTop = originalRect.top;
     let newLeft = originalRect.left;
 
-    // Apply horizontal expansion
+    // Horizontal expansion logic
     if (expandLeft && expandRight) {
-      newWidth = originalRect.width + baseExpansion;
-      newLeft = originalRect.left - baseExpansion / 2;
+      newWidth = originalRect.width + baseWidthExpansion;
+      newLeft = originalRect.left - baseWidthExpansion / 2;
     } else if (expandRight && !expandLeft) {
-      newWidth = originalRect.width + baseExpansion / 2;
+      newWidth = originalRect.width + baseWidthExpansion / 2;
     } else if (expandLeft && !expandRight) {
-      newWidth = originalRect.width + baseExpansion / 2;
-      newLeft = originalRect.left - baseExpansion / 2;
+      newWidth = originalRect.width + baseWidthExpansion / 2;
+      newLeft = originalRect.left - baseWidthExpansion / 2;
     }
 
-    // Apply vertical expansion
+    // Vertical expansion logic
+    const heightDifference = newHeight - originalRect.height;
     if (expandUp && expandDown) {
-      newHeight = originalRect.height + baseExpansion + 200;
-      newTop = originalRect.top - baseExpansion / 2;
+      newTop = originalRect.top - heightDifference / 2;
     } else if (expandDown && !expandUp) {
-      newHeight = originalRect.height + baseExpansion + 100;
+      // Keep top position, expand downward
     } else if (expandUp && !expandDown) {
-      newHeight = originalRect.height + baseExpansion + 100;
-      newTop = originalRect.top - baseExpansion - 100;
+      newTop = originalRect.top - heightDifference;
     }
 
-    // Ensure minimum size
+    // Ensure minimum size and viewport constraints
     newWidth = Math.max(newWidth, 400);
-    newHeight = Math.max(newHeight, 450);
+    newWidth = Math.min(newWidth, viewportWidth - 2 * margin);
+    newHeight = Math.min(newHeight, viewportHeight - headerHeight - 2 * margin);
 
-    // Ensure it doesn't go outside viewport
+    // Final boundary checks
     newLeft = Math.max(
       margin,
       Math.min(newLeft, viewportWidth - newWidth - margin),
@@ -456,14 +553,25 @@ const Index = () => {
     };
   };
 
-  // Handle widget expansion with improved stability
+  /**
+   * IMPROVED WIDGET INTERACTION HANDLER
+   *
+   * Manages hover and click interactions with enhanced stability:
+   * - Prevents premature collapse during mouse movement
+   * - Maintains proper state between hover and click modes
+   * - Implements protective delays for better UX
+   *
+   * @param widgetName - The widget identifier
+   * @param action - The interaction type (hover/leave/click)
+   */
   const handleWidgetInteraction = (
     widgetName: string,
     action: "hover" | "leave" | "click",
   ) => {
     if (action === "click") {
-      // Toggle on click
+      // Click handling: toggle or set expansion
       if (clickedWidget === widgetName) {
+        // Close if clicking the same widget
         setClickedWidget(null);
         setExpandedWidget(null);
         setWidgetPosition(null);
@@ -472,6 +580,7 @@ const Index = () => {
           setHoverTimer(null);
         }
       } else {
+        // Expand new widget
         const element = widgetRefs.current[widgetName];
         if (element) {
           const rect = element.getBoundingClientRect();
@@ -484,15 +593,19 @@ const Index = () => {
         }
         setClickedWidget(widgetName);
         setExpandedWidget(widgetName);
+        // Clear any hover timers
         if (hoverTimer) {
           clearTimeout(hoverTimer);
           setHoverTimer(null);
         }
       }
     } else if (action === "hover") {
-      // Only expand on hover if not clicked and not already expanded
+      // Hover handling: only if no widget is clicked and none currently expanded
       if (!clickedWidget && !expandedWidget) {
+        // Clear any existing timer
         if (hoverTimer) clearTimeout(hoverTimer);
+
+        // Set new hover timer
         const timer = setTimeout(() => {
           const element = widgetRefs.current[widgetName];
           if (element) {
@@ -505,23 +618,35 @@ const Index = () => {
             });
           }
           setExpandedWidget(widgetName);
-        }, 1000);
+        }, 1000); // 1 second hover delay
+
         setHoverTimer(timer);
       }
     } else if (action === "leave") {
-      // Only collapse on leave if not clicked and currently expanded via hover
+      // Leave handling: only collapse hover-expanded widgets
       if (!clickedWidget && expandedWidget === widgetName) {
-        if (hoverTimer) clearTimeout(hoverTimer);
-        const timer = setTimeout(() => {
-          setExpandedWidget(null);
-          setWidgetPosition(null);
-        }, 500); // Increased delay for stability
-        setHoverTimer(timer);
+        // Clear hover timer if widget is still expanding
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+          setHoverTimer(null);
+        }
+
+        // Only collapse if widget was expanded via hover
+        if (expandedWidget === widgetName) {
+          const timer = setTimeout(() => {
+            setExpandedWidget(null);
+            setWidgetPosition(null);
+          }, 200); // Reduced delay for immediate response
+          setHoverTimer(timer);
+        }
       }
     }
   };
 
-  // Handle navigation clicks
+  /**
+   * Navigation click handler
+   * Maps navigation items to corresponding widgets
+   */
   const handleNavClick = (section: string) => {
     const widgetMap: { [key: string]: string } = {
       ABOUT: "about",
@@ -546,35 +671,51 @@ const Index = () => {
     }
   };
 
-  // Handle theme change
+  /**
+   * Theme change handler with smooth transitions
+   */
   const handleThemeChange = (themeId: string) => {
     setCurrentTheme(themeId);
     setShowThemeSelector(false);
   };
 
-  // Check if widget is expanded
+  /**
+   * Check if a specific widget is currently expanded
+   */
   const isWidgetExpanded = (widgetName: string) => {
     return expandedWidget === widgetName;
   };
 
-  // Get visible skills for the main widget (5 skills with fade)
+  /**
+   * Get the first 5 skills with fade effect on the last one
+   * Used for the collapsed skills widget display
+   */
   const getVisibleSkills = () => {
     const skills = allSkills.slice(0, 5);
     return skills.map((skill, index) => ({
       ...skill,
-      opacity: index === 4 ? 0.3 : 1, // Fade effect on last skill
+      opacity: index === 4 ? 0.3 : 1, // Fade effect creates "see more" hint
     }));
   };
 
-  // Get featured projects
+  /**
+   * Filter projects to show only featured ones in main grid
+   */
   const getFeaturedProjects = () =>
     allProjects.filter((project) => project.featured);
 
-  // CSS Classes
+  /**
+   * Standard card hover classes for consistent animations
+   */
   const cardHoverClass =
     "transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:-translate-y-2 cursor-pointer group";
 
-  // ==================== LOADING PHASES ====================
+  // ==================== LOADING PHASE CONTENT ====================
+
+  /**
+   * Get loading content based on current phase
+   * Each phase has different text, dots, and colors for visual progression
+   */
   const getLoadingContent = () => {
     const phases = [
       { text: "INITIALIZING", dots: 3, color: theme.colors.primary },
@@ -584,9 +725,12 @@ const Index = () => {
     return phases[loadingPhase];
   };
 
-  // ==================== COMPONENT HELPERS ====================
+  // ==================== REUSABLE COMPONENTS ====================
 
-  // Contact Form Component
+  /**
+   * Professional contact form component
+   * Styled to match the current theme
+   */
   const ContactForm = () => (
     <div className="space-y-4 mt-4">
       <div>
@@ -637,7 +781,12 @@ const Index = () => {
     </div>
   );
 
-  // Render expanded widget overlay content
+  /**
+   * EXPANDED WIDGET CONTENT RENDERER
+   *
+   * Renders detailed content for each widget type
+   * Content is specifically sized to minimize empty space
+   */
   const renderExpandedContent = (widgetName: string) => {
     switch (widgetName) {
       case "hero":
@@ -841,7 +990,8 @@ const Index = () => {
             >
               Skills & Expertise
             </h3>
-            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+            {/* Optimized container height to eliminate empty space */}
+            <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar">
               {allSkills.map((skill, index) => (
                 <div
                   key={skill.name}
@@ -982,7 +1132,8 @@ const Index = () => {
             >
               All Projects
             </h3>
-            <div className="grid grid-cols-2 gap-4 max-h-80 overflow-y-auto custom-scrollbar">
+            {/* Optimized grid height to show all projects without empty space */}
+            <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto custom-scrollbar">
               {allProjects.map((project) => (
                 <div
                   key={project.id}
@@ -1075,9 +1226,11 @@ const Index = () => {
     }
   };
 
+  // ==================== MAIN RENDER ====================
+
   return (
     <>
-      {/* Google Fonts Import */}
+      {/* Google Fonts Import for Professional Typography */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"
@@ -1089,6 +1242,7 @@ const Index = () => {
         rel="stylesheet"
       />
 
+      {/* Main Application Container */}
       <div
         className="min-h-screen w-full overflow-hidden relative transition-colors duration-700"
         style={{
@@ -1096,7 +1250,7 @@ const Index = () => {
           fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
-        {/* ==================== SOPHISTICATED PROGRESS BAR ==================== */}
+        {/* ==================== LOADING PROGRESS BAR ==================== */}
         <div className="fixed top-0 left-0 w-full h-1 z-50 bg-black/20">
           <div
             className="h-full transition-all duration-300 ease-out relative overflow-hidden"
@@ -1106,6 +1260,7 @@ const Index = () => {
               boxShadow: `0 0 20px ${theme.colors.primary}`,
             }}
           >
+            {/* Animated shimmer effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
           </div>
         </div>
@@ -1149,7 +1304,7 @@ const Index = () => {
                   BENTOLIO
                 </div>
 
-                {/* Animated underline */}
+                {/* Animated progress underline */}
                 <div
                   className="absolute bottom-0 left-1/2 transform -translate-x-1/2 h-0.5 transition-all duration-1000"
                   style={{
@@ -1214,11 +1369,12 @@ const Index = () => {
           </div>
         </div>
 
-        {/* ==================== HEADER SECTION (ALWAYS UNBLURRED) ==================== */}
+        {/* ==================== FIXED HEADER (ALWAYS UNBLURRED) ==================== */}
         <div
           className={`fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-6 backdrop-blur-sm z-50 transition-colors duration-700`}
-          style={{ backgroundColor: `${theme.colors.background}99` }}
+          style={{ backgroundColor: `${theme.colors.background}dd` }}
         >
+          {/* Brand Logo */}
           <div
             className="text-3xl font-light tracking-wide relative group"
             style={{
@@ -1227,9 +1383,11 @@ const Index = () => {
             }}
           >
             BENTOLIO
+            {/* Animated underline on hover */}
             <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></div>
           </div>
 
+          {/* Navigation Menu */}
           <div className="flex space-x-8">
             {["ABOUT", "WORK", "CONTACT"].map((item) => (
               <button
@@ -1239,6 +1397,7 @@ const Index = () => {
                 style={{ color: theme.colors.text }}
               >
                 <span className="relative z-10">{item}</span>
+                {/* Hover background effect */}
                 <div className="absolute inset-0 bg-white/10 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 origin-left rounded"></div>
               </button>
             ))}
@@ -1252,9 +1411,9 @@ const Index = () => {
           } ${showBlur ? "blur-sm" : "blur-0"}`}
         >
           <div className="grid grid-cols-12 gap-[14px] min-h-screen relative z-10">
-            {/* ==================== MAIN CONTENT GRID ==================== */}
+            {/* ==================== BENTO GRID LAYOUT ==================== */}
             <div className="col-span-12 grid grid-cols-12 gap-[14px] pb-[14px]">
-              {/* ==================== HERO SECTION ==================== */}
+              {/* HERO SECTION - Large feature card */}
               <div
                 ref={(el) => (widgetRefs.current["hero"] = el)}
                 className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1267,6 +1426,7 @@ const Index = () => {
                 <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white/10 animate-spin"></div>
                 <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-white/5"></div>
 
+                {/* Hero Text */}
                 <h1
                   className="text-6xl md:text-8xl font-light mb-4 group-hover:scale-105 transition-transform duration-300"
                   style={{
@@ -1293,6 +1453,7 @@ const Index = () => {
                   development
                 </p>
 
+                {/* Star decoration */}
                 <svg
                   className="absolute top-1/2 right-8 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
@@ -1302,7 +1463,7 @@ const Index = () => {
                 </svg>
               </div>
 
-              {/* ==================== PROFILE CARD ==================== */}
+              {/* PROFILE CARD - Personal information */}
               <div
                 ref={(el) => (widgetRefs.current["profile"] = el)}
                 className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1311,6 +1472,7 @@ const Index = () => {
                 onMouseLeave={() => handleWidgetInteraction("profile", "leave")}
                 onClick={() => handleWidgetInteraction("profile", "click")}
               >
+                {/* Profile Avatar */}
                 <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl">
                   <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
                     <svg
@@ -1322,6 +1484,8 @@ const Index = () => {
                     </svg>
                   </div>
                 </div>
+
+                {/* Profile Info */}
                 <h3
                   className="text-xl font-medium mb-2"
                   style={{
@@ -1338,6 +1502,7 @@ const Index = () => {
                   UI/UX Designer & Developer
                 </p>
 
+                {/* Availability Status */}
                 <div className="flex items-center mt-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
                   <span
@@ -1349,7 +1514,7 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* ==================== ABOUT SECTION ==================== */}
+              {/* ABOUT SECTION - Personal story */}
               <div
                 ref={(el) => (widgetRefs.current["about"] = el)}
                 className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1358,6 +1523,7 @@ const Index = () => {
                 onMouseLeave={() => handleWidgetInteraction("about", "leave")}
                 onClick={() => handleWidgetInteraction("about", "click")}
               >
+                {/* Quote mark decoration */}
                 <svg
                   className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
@@ -1385,7 +1551,7 @@ const Index = () => {
                 </p>
               </div>
 
-              {/* ==================== SKILLS SECTION ==================== */}
+              {/* SKILLS SECTION - Technical expertise */}
               <div
                 ref={(el) => (widgetRefs.current["skills"] = el)}
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1404,6 +1570,7 @@ const Index = () => {
                   Skills
                 </h3>
 
+                {/* Skills list with fade effect */}
                 <div className="space-y-3 relative">
                   {getVisibleSkills().map((skill, index) => (
                     <div
@@ -1419,7 +1586,7 @@ const Index = () => {
                     </div>
                   ))}
 
-                  {/* Fade overlay for bottom */}
+                  {/* Gradient fade effect at bottom */}
                   <div
                     className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
                     style={{
@@ -1429,7 +1596,7 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* ==================== LOCATION CARD ==================== */}
+              {/* LOCATION CARD - Geographic info */}
               <div
                 ref={(el) => (widgetRefs.current["location"] = el)}
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1467,11 +1634,12 @@ const Index = () => {
                   UTC-8 (PST)
                 </div>
 
+                {/* Decorative dots */}
                 <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-white/20 animate-pulse"></div>
                 <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-white/10"></div>
               </div>
 
-              {/* ==================== PROJECTS SECTION ==================== */}
+              {/* PROJECTS SECTION - Portfolio showcase */}
               <div
                 ref={(el) => (widgetRefs.current["projects"] = el)}
                 className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1494,6 +1662,7 @@ const Index = () => {
                   Recent Work
                 </h3>
 
+                {/* Featured projects grid */}
                 <div className="grid grid-cols-3 gap-4 h-32">
                   {getFeaturedProjects().map((project, i) => (
                     <div
@@ -1520,7 +1689,7 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* ==================== CONTACT SECTION ==================== */}
+              {/* CONTACT SECTION - Communication channels */}
               <div
                 ref={(el) => (widgetRefs.current["contact"] = el)}
                 className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
@@ -1529,6 +1698,7 @@ const Index = () => {
                 onMouseLeave={() => handleWidgetInteraction("contact", "leave")}
                 onClick={() => handleWidgetInteraction("contact", "click")}
               >
+                {/* Email icon decoration */}
                 <svg
                   className="absolute top-4 right-4 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="none"
@@ -1563,6 +1733,8 @@ const Index = () => {
                       hello@johndoe.dev
                     </span>
                   </a>
+
+                  {/* Social links */}
                   <div className="flex space-x-6">
                     {[
                       { name: "Twitter", icon: "🐦" },
@@ -1595,7 +1767,7 @@ const Index = () => {
 
         {/* ==================== COLOR THEME SWITCHER ==================== */}
         <div className="fixed bottom-6 right-6 z-50">
-          {/* Theme Selector Panel */}
+          {/* Theme Selection Panel */}
           {showThemeSelector && (
             <div className="absolute bottom-16 right-0 bg-black/80 backdrop-blur-md rounded-2xl p-4 min-w-64 border border-white/10">
               <h3 className="text-sm font-medium mb-3 text-white">
@@ -1610,6 +1782,7 @@ const Index = () => {
                       currentTheme === themeOption.id ? "bg-white/20" : ""
                     }`}
                   >
+                    {/* Theme color preview */}
                     <div className="flex space-x-1">
                       <div
                         className="w-4 h-4 rounded-full"
@@ -1629,6 +1802,7 @@ const Index = () => {
                     <span className="text-sm text-white">
                       {themeOption.name}
                     </span>
+                    {/* Active indicator */}
                     {currentTheme === themeOption.id && (
                       <div className="ml-auto w-2 h-2 rounded-full bg-green-400"></div>
                     )}
@@ -1638,7 +1812,7 @@ const Index = () => {
             </div>
           )}
 
-          {/* Theme Button */}
+          {/* Theme Switcher Button */}
           <button
             onClick={() => setShowThemeSelector(!showThemeSelector)}
             className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-black/80"
@@ -1664,6 +1838,7 @@ const Index = () => {
           <div
             className="fixed z-60 rounded-2xl p-8 shadow-2xl transition-all duration-500 overflow-y-auto"
             style={{
+              // Dynamic background based on widget type
               backgroundColor:
                 expandedWidget === "hero"
                   ? theme.colors.hero
@@ -1681,6 +1856,7 @@ const Index = () => {
                               ? theme.colors.contact
                               : theme.colors.profile,
               border: `1px solid ${theme.colors.primary}20`,
+              // Apply smart growth calculations
               ...getSmartGrowthStyle(),
             }}
           >
@@ -1708,14 +1884,15 @@ const Index = () => {
               </svg>
             </button>
 
-            {/* Expanded Content */}
+            {/* Dynamic Expanded Content */}
             {renderExpandedContent(expandedWidget)}
           </div>
         )}
       </div>
 
-      {/* ==================== CUSTOM STYLES ==================== */}
+      {/* ==================== CUSTOM SCROLLBAR STYLES ==================== */}
       <style jsx>{`
+        /* Custom scrollbar for expanded content */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
