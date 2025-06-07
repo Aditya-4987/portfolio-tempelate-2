@@ -2105,7 +2105,7 @@ export default function Index() {
               style={{ backgroundColor: theme.colors.location }}
               onClick={() => handleWidgetClick("location")}
             >
-              <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
+              <div className="text-5xl mb-4 transition-all duration-300">
                 🌍
               </div>
               <h3
