@@ -1,7 +1,61 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 
+/**
+ * BENTOLIO PORTFOLIO WEBSITE
+ *
+ * A sophisticated portfolio website featuring:
+ * - Smart widget expansion system with hover and click interactions
+ * - Dynamic color theme switching with 5 beautiful themes
+ * - Intelligent directional growth that respects viewport boundaries
+ * - Sequential blur effects for enhanced focus
+ * - Comprehensive loading animation with multiple phases
+ *
+ * Key Features:
+ * - Stable hover interactions with proper timer management
+ * - Content-aware expansion sizing to eliminate empty spaces
+ * - Header always stays visible and unblurred
+ * - Smooth color transitions across all elements
+ * - Professional animations and micro-interactions
+ */
+
 // ==================== TYPE DEFINITIONS ====================
 
+/**
+ * Skill data structure with proficiency levels and descriptions
+ */
+interface Skill {
+  name: string;
+  level: number;
+  description: string;
+  category: string;
+}
+
+/**
+ * Project data structure with comprehensive project information
+ */
+interface Project {
+  id: number;
+  name: string;
+  description: string;
+  tech: string[];
+  image: string;
+  liveUrl: string;
+  featured: boolean;
+}
+
+/**
+ * Widget position tracking for expansion calculations
+ */
+interface WidgetPosition {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Color theme configuration with comprehensive color palette
+ */
 interface ColorTheme {
   id: string;
   name: string;
@@ -114,7 +168,16 @@ export default function Index() {
   const [currentTheme, setCurrentTheme] = useState("charcoal");
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
+  const [clickedWidget, setClickedWidget] = useState<string | null>(null);
+  const [widgetPosition, setWidgetPosition] = useState<WidgetPosition | null>(
+    null,
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [skillAnimations, setSkillAnimations] = useState(false);
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // Widget refs for position tracking
+  const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // ==================== MEMOIZED THEME ====================
 
@@ -123,13 +186,147 @@ export default function Index() {
     [currentTheme],
   );
 
-  // ==================== LOADING EFFECT ====================
+  // ==================== SAMPLE DATA ====================
 
+  /**
+   * Skills data with realistic proficiency levels and descriptions
+   * Organized by category for better presentation
+   */
+  const allSkills: Skill[] = [
+    {
+      name: "React",
+      level: 95,
+      description: "Advanced component architecture and hooks",
+      category: "Frontend",
+    },
+    {
+      name: "TypeScript",
+      level: 90,
+      description: "Type-safe development and advanced patterns",
+      category: "Language",
+    },
+    {
+      name: "Node.js",
+      level: 88,
+      description: "Server-side development and API design",
+      category: "Backend",
+    },
+    {
+      name: "UI/UX Design",
+      level: 85,
+      description: "User-centered design and prototyping",
+      category: "Design",
+    },
+    {
+      name: "Next.js",
+      level: 92,
+      description: "Full-stack React framework expertise",
+      category: "Frontend",
+    },
+    {
+      name: "PostgreSQL",
+      level: 82,
+      description: "Database design and optimization",
+      category: "Backend",
+    },
+    {
+      name: "Figma",
+      level: 88,
+      description: "Design systems and collaboration",
+      category: "Design",
+    },
+    {
+      name: "GraphQL",
+      level: 80,
+      description: "API design and data fetching",
+      category: "Backend",
+    },
+    {
+      name: "Tailwind CSS",
+      level: 94,
+      description: "Utility-first CSS framework mastery",
+      category: "Frontend",
+    },
+    {
+      name: "AWS",
+      level: 75,
+      description: "Cloud infrastructure and deployment",
+      category: "DevOps",
+    },
+  ];
+
+  /**
+   * Project showcase with detailed information and metadata
+   * Features both highlighted and additional projects
+   */
+  const allProjects: Project[] = [
+    {
+      id: 1,
+      name: "E-commerce Platform",
+      description: "Full-stack Next.js application with Stripe integration",
+      tech: ["Next.js", "TypeScript", "Stripe", "PostgreSQL"],
+      image: "/api/placeholder/400/300",
+      liveUrl: "https://example.com",
+      featured: true,
+    },
+    {
+      id: 2,
+      name: "Design System",
+      description: "Comprehensive component library for design consistency",
+      tech: ["React", "Storybook", "Tailwind", "TypeScript"],
+      image: "/api/placeholder/400/300",
+      liveUrl: "https://example.com",
+      featured: true,
+    },
+    {
+      id: 3,
+      name: "Analytics Dashboard",
+      description: "Real-time data visualization with interactive charts",
+      tech: ["React", "D3.js", "Node.js", "WebSocket"],
+      image: "/api/placeholder/400/300",
+      liveUrl: "https://example.com",
+      featured: true,
+    },
+    {
+      id: 4,
+      name: "Mobile App",
+      description: "Cross-platform mobile application with React Native",
+      tech: ["React Native", "Expo", "Firebase"],
+      image: "/api/placeholder/400/300",
+      liveUrl: "https://example.com",
+      featured: false,
+    },
+    {
+      id: 5,
+      name: "API Gateway",
+      description: "Microservices architecture with GraphQL federation",
+      tech: ["GraphQL", "Node.js", "Docker", "Kubernetes"],
+      image: "/api/placeholder/400/300",
+      liveUrl: "https://example.com",
+      featured: false,
+    },
+    {
+      id: 6,
+      name: "Portfolio Website",
+      description: "Interactive portfolio with advanced animations",
+      tech: ["React", "Framer Motion", "Three.js"],
+      image: "/api/placeholder/400/300",
+      liveUrl: "https://example.com",
+      featured: false,
+    },
+  ];
+
+  // ==================== LOADING ANIMATION ====================
+
+  /**
+   * Sophisticated 3-phase loading animation with realistic progression
+   * Each phase has different timing and visual characteristics
+   */
   useEffect(() => {
     const phases = [
-      { duration: 2000, increment: 0.5 },
-      { duration: 1500, increment: 1.5 },
-      { duration: 1000, increment: 3 },
+      { duration: 2000, increment: 0.5 }, // Initializing phase
+      { duration: 1500, increment: 1.5 }, // Building phase
+      { duration: 1000, increment: 3 }, // Finalizing phase
     ];
 
     let currentPhase = 0;
@@ -139,6 +336,7 @@ export default function Index() {
       const phase = phases[currentPhase];
       phaseProgress += phase.increment + Math.random() * 1;
 
+      // Phase transition logic
       if (currentPhase === 0 && phaseProgress >= 25) {
         setLoadingPhase(1);
         currentPhase = 1;
@@ -151,6 +349,7 @@ export default function Index() {
 
       setProgress(Math.min(phaseProgress, 100));
 
+      // Complete loading sequence
       if (phaseProgress >= 100) {
         clearInterval(timer);
         setTimeout(() => {
@@ -163,22 +362,628 @@ export default function Index() {
     return () => clearInterval(timer);
   }, []);
 
-  // ==================== EVENT HANDLERS ====================
+  /**
+   * Skills animation trigger
+   * Delays progress bar animations until after expansion completes
+   */
+  useEffect(() => {
+    if (expandedWidget === "skills") {
+      setTimeout(() => setSkillAnimations(true), 300);
+    } else {
+      setSkillAnimations(false);
+    }
+  }, [expandedWidget]);
 
+  // ==================== SMART EXPANSION SYSTEM ====================
+
+  /**
+   * INTELLIGENT WIDGET INTERACTION HANDLER
+   *
+   * Manages click interactions with widget expansion:
+   * - Click to expand/collapse widgets
+   * - Tracks widget position for smart positioning
+   * - Manages state consistency
+   *
+   * @param widgetName - The widget identifier
+   */
+  const handleWidgetClick = (widgetName: string) => {
+    const element = widgetRefs.current[widgetName];
+
+    if (clickedWidget === widgetName) {
+      // Collapse if same widget clicked
+      setExpandedWidget(null);
+      setClickedWidget(null);
+      setWidgetPosition(null);
+    } else {
+      // Expand new widget
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setWidgetPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        });
+      }
+      setClickedWidget(widgetName);
+      setExpandedWidget(widgetName);
+    }
+  };
+
+  /**
+   * Navigation click handler
+   * Maps navigation items to corresponding widgets and closes mobile menu
+   */
+  const handleNavClick = (item: string) => {
+    const widgetMap: { [key: string]: string } = {
+      Work: "projects",
+      About: "about",
+      Skills: "skills",
+      Contact: "contact",
+    };
+
+    const widgetName = widgetMap[item] || item.toLowerCase();
+    handleWidgetClick(widgetName);
+    setIsMobileMenuOpen(false);
+  };
+
+  /**
+   * Theme change handler with theme selector auto-close
+   */
   const handleThemeChange = (themeId: string) => {
     setCurrentTheme(themeId);
     setShowThemeSelector(false);
   };
 
-  const handleWidgetClick = (widgetName: string) => {
-    setExpandedWidget(expandedWidget === widgetName ? null : widgetName);
+  /**
+   * Check if a specific widget is currently expanded
+   */
+  const isWidgetExpanded = (widgetName: string) => {
+    return expandedWidget === widgetName;
   };
 
-  const closeModal = () => {
-    setExpandedWidget(null);
+  // ==================== CONTENT RENDERING ====================
+
+  /**
+   * COMPREHENSIVE EXPANDED CONTENT RENDERER
+   *
+   * Provides detailed, interactive content for each widget
+   * with rich information and professional presentation
+   */
+  const renderExpandedContent = (widgetName: string) => {
+    const textStyle = { color: theme.colors.text };
+    const playfairStyle = {
+      color: theme.colors.text,
+      fontFamily: "Playfair Display, serif",
+    };
+
+    switch (widgetName) {
+      case "hero":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-2xl font-medium mb-4" style={playfairStyle}>
+                Our Mission
+              </h3>
+              <p
+                className="text-sm opacity-80 leading-relaxed mb-4"
+                style={textStyle}
+              >
+                We believe in creating digital experiences that not only look
+                beautiful but solve real problems and create meaningful
+                connections between brands and their audiences. Every project is
+                an opportunity to push boundaries and deliver exceptional
+                results.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4 className="font-medium mb-3" style={textStyle}>
+                Our Services
+              </h4>
+              <ul className="space-y-2 text-sm opacity-80" style={textStyle}>
+                <li>• Full-stack Web Development</li>
+                <li>• UI/UX Design & Prototyping</li>
+                <li>• Mobile App Development</li>
+                <li>• Design System Creation</li>
+                <li>• Performance Optimization</li>
+                <li>• Technical Consulting</li>
+                <li>• API Development & Integration</li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-2xl font-bold mb-1" style={textStyle}>
+                  50+
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Projects Completed
+                </div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-2xl font-bold mb-1" style={textStyle}>
+                  8+
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Years Experience
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <button className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
+                Start a Project
+              </button>
+            </div>
+          </div>
+        );
+
+      case "profile":
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                <div className="w-16 h-16 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-10 h-10 text-gray-600"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="text-lg font-medium mb-1" style={textStyle}>
+                John Doe
+              </div>
+              <div className="text-xs opacity-70 mb-3" style={textStyle}>
+                Senior Creative Developer
+              </div>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4 className="font-medium mb-2" style={textStyle}>
+                Achievements
+              </h4>
+              <ul className="space-y-1 text-sm opacity-80" style={textStyle}>
+                <li>🏆 Best Web App - TechCrunch Awards 2023</li>
+                <li>⭐ Featured on Product Hunt #1</li>
+                <li>🎖️ Google Developer Expert</li>
+                <li>📜 AWS Certified Solutions Architect</li>
+              </ul>
+            </div>
+
+            <div className="border-l-2 border-blue-500/30 pl-4">
+              <h4 className="font-medium mb-2" style={textStyle}>
+                Certifications
+              </h4>
+              <ul className="space-y-1 text-sm opacity-80" style={textStyle}>
+                <li>• React Advanced Patterns</li>
+                <li>• TypeScript Deep Dive</li>
+                <li>• AWS Cloud Practitioner</li>
+                <li>• UX Design Fundamentals</li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <div className="text-lg font-bold mb-1" style={textStyle}>
+                  4.9
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Rating
+                </div>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <div className="text-lg font-bold mb-1" style={textStyle}>
+                  100%
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Success
+                </div>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <div className="text-lg font-bold mb-1" style={textStyle}>
+                  24h
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Response
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "about":
+        return (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-medium mb-3" style={playfairStyle}>
+                About Me
+              </h3>
+              <p
+                className="text-sm opacity-80 leading-relaxed mb-4"
+                style={textStyle}
+              >
+                I'm a passionate creative developer with over 8 years of
+                experience in crafting digital experiences that bridge the gap
+                between design and technology. My journey started with a
+                curiosity about how beautiful interfaces come to life through
+                code.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-green-500/30 pl-4">
+              <h4 className="font-medium mb-3" style={textStyle}>
+                Journey Timeline
+              </h4>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-medium" style={textStyle}>
+                      Senior Developer
+                    </div>
+                    <div className="text-xs opacity-70" style={textStyle}>
+                      Tech Innovators Inc.
+                    </div>
+                  </div>
+                  <div className="text-xs opacity-60" style={textStyle}>
+                    2020 - Present
+                  </div>
+                </div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-medium" style={textStyle}>
+                      Full-stack Developer
+                    </div>
+                    <div className="text-xs opacity-70" style={textStyle}>
+                      Digital Solutions Co.
+                    </div>
+                  </div>
+                  <div className="text-xs opacity-60" style={textStyle}>
+                    2018 - 2020
+                  </div>
+                </div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-medium" style={textStyle}>
+                      Frontend Developer
+                    </div>
+                    <div className="text-xs opacity-70" style={textStyle}>
+                      StartUp Ventures
+                    </div>
+                  </div>
+                  <div className="text-xs opacity-60" style={textStyle}>
+                    2016 - 2018
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-purple-500/30 pl-4">
+              <h4 className="font-medium mb-2" style={textStyle}>
+                Philosophy
+              </h4>
+              <p className="text-sm opacity-80" style={textStyle}>
+                "Great design is not just about making things look
+                beautiful—it's about solving problems elegantly and creating
+                experiences that users love and remember."
+              </p>
+            </div>
+          </div>
+        );
+
+      case "skills":
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium mb-4" style={playfairStyle}>
+              Technical Skills
+            </h3>
+
+            <div className="space-y-3">
+              {allSkills.map((skill, index) => (
+                <div key={skill.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium" style={textStyle}>
+                      {skill.name}
+                    </span>
+                    <span className="text-xs opacity-70" style={textStyle}>
+                      {skill.level}%
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: skillAnimations ? `${skill.level}%` : "0%",
+                        transitionDelay: `${index * 100}ms`,
+                      }}
+                    />
+                  </div>
+
+                  <p className="text-xs opacity-60" style={textStyle}>
+                    {skill.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-xl font-bold mb-1" style={textStyle}>
+                  10+
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Technologies
+                </div>
+              </div>
+              <div className="text-center p-4 bg-white/5 rounded-lg">
+                <div className="text-xl font-bold mb-1" style={textStyle}>
+                  5+
+                </div>
+                <div className="text-xs opacity-70" style={textStyle}>
+                  Years Each
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "location":
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-4xl mb-3">🌍</div>
+              <h3 className="text-xl font-medium mb-2" style={playfairStyle}>
+                Location & Availability
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="text-lg">📍</div>
+                  <div>
+                    <div className="font-medium text-sm" style={textStyle}>
+                      Based in
+                    </div>
+                    <div className="text-xs opacity-70" style={textStyle}>
+                      San Francisco, CA
+                    </div>
+                  </div>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="text-lg">🕐</div>
+                  <div>
+                    <div className="font-medium text-sm" style={textStyle}>
+                      Local Time
+                    </div>
+                    <div className="text-xs opacity-70" style={textStyle}>
+                      PST (UTC-8)
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm font-mono" style={textStyle}>
+                  2:30 PM
+                </div>
+              </div>
+
+              <div className="border-l-2 border-blue-500/30 pl-4">
+                <h4 className="font-medium mb-2" style={textStyle}>
+                  Work Preferences
+                </h4>
+                <ul className="space-y-1 text-sm opacity-80" style={textStyle}>
+                  <li>🌐 Remote-first approach</li>
+                  <li>🤝 Collaborative team environment</li>
+                  <li>⚡ Agile development methodology</li>
+                  <li>🔄 Flexible working hours</li>
+                </ul>
+              </div>
+
+              <div className="border-l-2 border-green-500/30 pl-4">
+                <h4 className="font-medium mb-2" style={textStyle}>
+                  Languages
+                </h4>
+                <ul className="space-y-1 text-sm opacity-80" style={textStyle}>
+                  <li>🇺🇸 English (Native)</li>
+                  <li>🇪🇸 Spanish (Conversational)</li>
+                  <li>💻 JavaScript (Fluent)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "projects":
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium mb-4" style={playfairStyle}>
+              Featured Projects
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {allProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                >
+                  <div className="aspect-video bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-lg mb-3 flex items-center justify-center">
+                    <div className="text-2xl opacity-50">🖼️</div>
+                  </div>
+
+                  <h4 className="font-medium mb-2" style={textStyle}>
+                    {project.name}
+                  </h4>
+                  <p className="text-xs opacity-70 mb-3" style={textStyle}>
+                    {project.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {project.tech.map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-2 py-1 bg-white/10 rounded text-xs"
+                        style={textStyle}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    className="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 rounded text-xs font-medium transition-colors duration-200"
+                    style={textStyle}
+                  >
+                    Visit Project →
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center pt-4">
+              <button className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
+                View All Projects
+              </button>
+            </div>
+          </div>
+        );
+
+      case "contact":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-medium mb-3" style={playfairStyle}>
+                Get In Touch
+              </h3>
+              <p className="text-sm opacity-80" style={textStyle}>
+                Ready to bring your ideas to life? Let's discuss your next
+                project and create something amazing together.
+              </p>
+            </div>
+
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={textStyle}
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
+                    style={textStyle}
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={textStyle}
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
+                    style={textStyle}
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={textStyle}
+                >
+                  Project Type
+                </label>
+                <select
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200"
+                  style={textStyle}
+                >
+                  <option value="">Select project type</option>
+                  <option value="web">Web Development</option>
+                  <option value="mobile">Mobile App</option>
+                  <option value="design">UI/UX Design</option>
+                  <option value="consulting">Consulting</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={textStyle}
+                >
+                  Message
+                </label>
+                <textarea
+                  rows={4}
+                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:border-amber-500 focus:outline-none transition-colors duration-200 resize-none"
+                  style={textStyle}
+                  placeholder="Tell me about your project..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300"
+              >
+                Send Message
+              </button>
+            </form>
+
+            <div className="border-t border-white/10 pt-4">
+              <h4 className="font-medium mb-3" style={textStyle}>
+                Alternative Contact Methods
+              </h4>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3 p-2 hover:bg-white/5 rounded-lg transition-colors duration-200">
+                  <div className="text-sm">📧</div>
+                  <div className="text-sm" style={textStyle}>
+                    hello@johndoe.dev
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-2 hover:bg-white/5 rounded-lg transition-colors duration-200">
+                  <div className="text-sm">📱</div>
+                  <div className="text-sm" style={textStyle}>
+                    +1 (555) 123-4567
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-2 hover:bg-white/5 rounded-lg transition-colors duration-200">
+                  <div className="text-sm">💼</div>
+                  <div className="text-sm" style={textStyle}>
+                    linkedin.com/in/johndoe
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium" style={textStyle}>
+              {widgetName.charAt(0).toUpperCase() + widgetName.slice(1)}
+            </h3>
+            <p className="text-sm opacity-80" style={textStyle}>
+              Detailed content for {widgetName} widget.
+            </p>
+          </div>
+        );
+    }
   };
 
-  // ==================== RENDER FUNCTIONS ====================
+  // ==================== LOADING SCREEN CONTENT ====================
 
   const getLoadingContent = () => {
     switch (loadingPhase) {
@@ -193,78 +998,10 @@ export default function Index() {
     }
   };
 
-  const renderExpandedContent = (widgetName: string) => {
-    const textColor = { color: theme.colors.text };
+  // ==================== CARD HOVER EFFECTS ====================
 
-    switch (widgetName) {
-      case "hero":
-        return (
-          <div className="space-y-6">
-            <h3 className="text-2xl font-medium mb-4" style={textColor}>
-              Our Mission
-            </h3>
-            <p className="text-sm opacity-80 leading-relaxed" style={textColor}>
-              We believe in creating digital experiences that not only look
-              beautiful but solve real problems and create meaningful
-              connections between brands and their audiences.
-            </p>
-            <div className="border-l-2 border-amber-500/30 pl-4">
-              <h4 className="font-medium mb-3" style={textColor}>
-                Our Services
-              </h4>
-              <ul className="space-y-2 text-sm opacity-80" style={textColor}>
-                <li>• Full-stack Web Development</li>
-                <li>• UI/UX Design & Prototyping</li>
-                <li>• Mobile App Development</li>
-                <li>• Design System Creation</li>
-                <li>• Performance Optimization</li>
-              </ul>
-            </div>
-          </div>
-        );
-
-      case "profile":
-        return (
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                <div className="w-16 h-16 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-10 h-10 text-gray-600"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="text-lg font-medium mb-1" style={textColor}>
-                John Doe
-              </div>
-              <div className="text-xs opacity-70 mb-3" style={textColor}>
-                Senior Creative Developer
-              </div>
-            </div>
-            <p className="text-sm opacity-80" style={textColor}>
-              Passionate about crafting exceptional digital experiences with
-              over 8 years of experience in full-stack development and design.
-            </p>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="space-y-4">
-            <h3 className="text-xl font-medium" style={textColor}>
-              {widgetName.charAt(0).toUpperCase() + widgetName.slice(1)}
-            </h3>
-            <p className="text-sm opacity-80" style={textColor}>
-              Detailed content for {widgetName} widget.
-            </p>
-          </div>
-        );
-    }
-  };
+  const cardHoverClass =
+    "hover:scale-105 hover:shadow-2xl transition-all duration-300 ease-out";
 
   // ==================== LOADING SCREEN ====================
 
@@ -274,6 +1011,7 @@ export default function Index() {
         className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
         style={{ backgroundColor: theme.colors.background }}
       >
+        {/* Animated Background Elements */}
         <div className="absolute inset-0 opacity-10">
           <div
             className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full animate-pulse"
@@ -289,6 +1027,14 @@ export default function Index() {
               animationDelay: "1s",
             }}
           />
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 border-2 rounded-full animate-spin"
+            style={{
+              borderColor: theme.colors.primary,
+              borderTopColor: "transparent",
+              animationDuration: "3s",
+            }}
+          />
         </div>
 
         <div className="z-10 text-center">
@@ -301,7 +1047,7 @@ export default function Index() {
               }}
             />
             <h1
-              className="text-4xl font-bold mb-4"
+              className="text-4xl font-bold mb-4 animate-pulse"
               style={{ color: getLoadingContent().color }}
             >
               Bentolio
@@ -316,29 +1062,41 @@ export default function Index() {
 
           <div className="w-80 bg-white/10 rounded-full h-2 overflow-hidden">
             <div
-              className="h-full transition-all duration-300 ease-out rounded-full"
+              className="h-full transition-all duration-300 ease-out rounded-full relative"
               style={{
                 width: `${progress}%`,
                 backgroundColor: theme.colors.primary,
               }}
-            />
+            >
+              <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full" />
+            </div>
+          </div>
+
+          <div
+            className="mt-4 text-sm opacity-60"
+            style={{ color: theme.colors.text }}
+          >
+            {progress.toFixed(0)}% Complete
           </div>
         </div>
       </div>
     );
   }
 
-  // ==================== MAIN CONTENT ====================
+  // ==================== TRANSITION SCREEN ====================
 
   if (!showMain) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center transition-all duration-1000"
         style={{ backgroundColor: `${theme.colors.background}dd` }}
       >
         <div
           className="text-6xl font-bold animate-fadeIn"
-          style={{ color: theme.colors.text }}
+          style={{
+            color: theme.colors.text,
+            animation: "fadeIn 1.5s ease-in-out",
+          }}
         >
           Welcome
         </div>
@@ -346,16 +1104,18 @@ export default function Index() {
     );
   }
 
+  // ==================== MAIN PORTFOLIO CONTENT ====================
+
   return (
     <>
-      {/* ==================== HEADER ==================== */}
+      {/* ==================== HEADER NAVIGATION ==================== */}
       <header
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-white/10"
         style={{ backgroundColor: `${theme.colors.background}95` }}
       >
         <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div
-            className="text-xl font-bold"
+            className="text-xl font-bold transition-colors duration-300"
             style={{ color: theme.colors.text }}
           >
             Bentolio
@@ -366,11 +1126,15 @@ export default function Index() {
             {["Work", "About", "Skills", "Contact"].map((item) => (
               <button
                 key={item}
-                onClick={() => handleWidgetClick(item.toLowerCase())}
-                className="text-sm hover:opacity-80 transition-opacity duration-200"
+                onClick={() => handleNavClick(item)}
+                className="text-sm hover:opacity-80 transition-all duration-200 relative group"
                 style={{ color: theme.colors.text }}
               >
                 {item}
+                <div
+                  className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                  style={{ backgroundColor: theme.colors.primary }}
+                />
               </button>
             ))}
           </div>
@@ -378,38 +1142,35 @@ export default function Index() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden w-6 h-6 flex flex-col justify-center space-y-1"
+            className="md:hidden w-6 h-6 flex flex-col justify-center space-y-1 transition-all duration-300"
           >
             <span
-              className="w-full h-0.5 transition-all duration-300"
+              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`}
               style={{ backgroundColor: theme.colors.text }}
             />
             <span
-              className="w-full h-0.5 transition-all duration-300"
+              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""}`}
               style={{ backgroundColor: theme.colors.text }}
             />
             <span
-              className="w-full h-0.5 transition-all duration-300"
+              className={`w-full h-0.5 transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
               style={{ backgroundColor: theme.colors.text }}
             />
           </button>
         </nav>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Panel */}
         {isMobileMenuOpen && (
           <div
-            className="md:hidden absolute top-full left-0 right-0 border-b border-white/10 backdrop-blur-md"
+            className="md:hidden absolute top-full left-0 right-0 border-b border-white/10 backdrop-blur-md transition-all duration-300"
             style={{ backgroundColor: theme.colors.background }}
           >
             <div className="px-6 py-4 space-y-4">
               {["Work", "About", "Skills", "Contact"].map((item) => (
                 <button
                   key={item}
-                  onClick={() => {
-                    handleWidgetClick(item.toLowerCase());
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left text-sm hover:opacity-80 transition-opacity duration-200"
+                  onClick={() => handleNavClick(item)}
+                  className="block w-full text-left text-sm hover:opacity-80 transition-opacity duration-200 py-2"
                   style={{ color: theme.colors.text }}
                 >
                   {item}
@@ -420,52 +1181,60 @@ export default function Index() {
         )}
       </header>
 
-      {/* ==================== MAIN CONTENT GRID ==================== */}
+      {/* ==================== MAIN BENTO GRID LAYOUT ==================== */}
       <main
-        className="min-h-screen pt-24 pb-16 px-6"
+        className="min-h-screen pt-24 pb-16 px-6 transition-colors duration-500"
         style={{ backgroundColor: theme.colors.background }}
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-12 gap-6 auto-rows-max">
-            {/* Hero Widget */}
+            {/* Hero Widget - Main Showcase */}
             <div
-              className="col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
+              ref={(el) => (widgetRefs.current["hero"] = el)}
+              className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
               style={{ backgroundColor: theme.colors.hero }}
               onClick={() => handleWidgetClick("hero")}
             >
-              <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white/10 animate-spin" />
-              <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-white/5" />
+              {/* Decorative Elements */}
+              <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white/10 animate-spin"></div>
+              <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-white/5"></div>
 
+              {/* Hero Text */}
               <h1
-                className="text-5xl font-bold mb-4"
-                style={{ color: theme.colors.text }}
+                className="text-5xl font-bold mb-4 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
               >
                 Creative
                 <br />
                 Developer
               </h1>
               <p
-                className="text-lg opacity-80 mb-6 max-w-md"
+                className="text-lg opacity-80 mb-6 max-w-md transition-colors duration-300"
                 style={{ color: theme.colors.text }}
               >
                 Crafting exceptional digital experiences through innovative
                 design and cutting-edge technology.
               </p>
               <button
-                className="px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all duration-300"
+                className="px-6 py-3 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all duration-300 hover:scale-105"
                 style={{ color: theme.colors.text }}
               >
-                View Work
+                View Work →
               </button>
             </div>
 
             {/* Profile Widget */}
             <div
-              className="col-span-12 md:col-span-4 h-80 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105"
+              ref={(el) => (widgetRefs.current["profile"] = el)}
+              className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
               style={{ backgroundColor: theme.colors.profile }}
               onClick={() => handleWidgetClick("profile")}
             >
-              <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4">
+              {/* Profile Avatar */}
+              <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl">
                 <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
                   <svg
                     className="w-12 h-12 text-gray-600"
@@ -477,97 +1246,273 @@ export default function Index() {
                 </div>
               </div>
               <h3
-                className="text-xl font-medium mb-2"
+                className="text-xl font-medium mb-2 transition-colors duration-300"
                 style={{ color: theme.colors.text }}
               >
                 John Doe
               </h3>
               <p
-                className="text-sm opacity-80"
+                className="text-sm opacity-80 transition-colors duration-300"
                 style={{ color: theme.colors.text }}
               >
                 Senior Creative Developer with expertise in React, TypeScript,
                 and modern web technologies.
               </p>
+
+              {/* Floating Elements */}
+              <div className="absolute top-4 right-4">
+                <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
+              </div>
             </div>
 
-            {/* Other Widgets */}
-            {[
-              {
-                name: "about",
-                title: "About Me",
-                span: "col-span-12 md:col-span-6",
-                height: "h-60",
-              },
-              {
-                name: "skills",
-                title: "Skills",
-                span: "col-span-12 md:col-span-3",
-                height: "h-60",
-              },
-              {
-                name: "location",
-                title: "Location",
-                span: "col-span-12 md:col-span-3",
-                height: "h-60",
-              },
-              {
-                name: "projects",
-                title: "Recent Work",
-                span: "col-span-12 md:col-span-8",
-                height: "h-60",
-              },
-              {
-                name: "contact",
-                title: "Contact",
-                span: "col-span-12 md:col-span-4",
-                height: "h-60",
-              },
-            ].map((widget) => (
-              <div
-                key={widget.name}
-                className={`${widget.span} ${widget.height} rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105`}
-                style={{
-                  backgroundColor:
-                    theme.colors[widget.name as keyof typeof theme.colors],
-                }}
-                onClick={() => handleWidgetClick(widget.name)}
+            {/* About Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["about"] = el)}
+              className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
+              style={{ backgroundColor: theme.colors.about }}
+              onClick={() => handleWidgetClick("about")}
+            >
+              {/* Quote mark decoration */}
+              <svg
+                className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
+                fill="currentColor"
+                style={{ color: theme.colors.text }}
+                viewBox="0 0 24 24"
               >
-                <h3
-                  className="text-xl font-medium mb-4"
-                  style={{ color: theme.colors.text }}
-                >
-                  {widget.title}
-                </h3>
-                <p
-                  className="text-sm opacity-80"
-                  style={{ color: theme.colors.text }}
-                >
-                  Click to explore {widget.title.toLowerCase()}
-                </p>
+                <path d="M14,17H17L19,13V7H13V13H16M6,17H9L11,13V7H5V13H8L6,17Z" />
+              </svg>
+
+              <h3
+                className="text-xl font-medium mb-3 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
+                About Me
+              </h3>
+              <p
+                className="text-sm opacity-80 leading-relaxed transition-colors duration-300"
+                style={{ color: theme.colors.text }}
+              >
+                Passionate about creating digital experiences that bridge design
+                and technology. With over 8 years of experience, I help bring
+                ideas to life through code.
+              </p>
+            </div>
+
+            {/* Skills Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["skills"] = el)}
+              className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
+              style={{ backgroundColor: theme.colors.skills }}
+              onClick={() => handleWidgetClick("skills")}
+            >
+              <h3
+                className="text-xl font-light mb-4 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
+                Skills
+              </h3>
+
+              {/* Display first 5 skills with fade effect */}
+              <div className="space-y-3 relative">
+                {allSkills.slice(0, 5).map((skill, index) => (
+                  <div
+                    key={skill.name}
+                    className="flex justify-between items-center"
+                  >
+                    <span
+                      className="text-sm font-medium transition-colors duration-300"
+                      style={{ color: theme.colors.text }}
+                    >
+                      {skill.name}
+                    </span>
+                    <div className="flex space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            i < Math.floor(skill.level / 20)
+                              ? "opacity-100"
+                              : "opacity-30"
+                          }`}
+                          style={{
+                            backgroundColor: theme.colors.text,
+                            animationDelay: `${index * 100 + i * 50}ms`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Fade gradient overlay */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(transparent, ${theme.colors.skills})`,
+                  }}
+                />
               </div>
-            ))}
+            </div>
+
+            {/* Location Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["location"] = el)}
+              className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
+              style={{ backgroundColor: theme.colors.location }}
+              onClick={() => handleWidgetClick("location")}
+            >
+              <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
+                🌍
+              </div>
+              <h3
+                className="text-lg font-light mb-2 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
+                Location
+              </h3>
+              <p
+                className="text-sm opacity-80 transition-colors duration-300"
+                style={{ color: theme.colors.text }}
+              >
+                San Francisco, CA
+              </p>
+              <p
+                className="text-xs opacity-60 mt-2 transition-colors duration-300"
+                style={{ color: theme.colors.text }}
+              >
+                Available for remote work worldwide
+              </p>
+
+              {/* Animated location pin */}
+              <div className="absolute bottom-4 right-4">
+                <div className="w-3 h-3 rounded-full bg-red-400 animate-ping"></div>
+              </div>
+            </div>
+
+            {/* Projects Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["projects"] = el)}
+              className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
+              style={{ backgroundColor: theme.colors.projects }}
+              onClick={() => handleWidgetClick("projects")}
+            >
+              <h3
+                className="text-2xl font-light mb-4 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
+                Recent Work
+              </h3>
+
+              {/* Featured Projects Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                {allProjects.slice(0, 3).map((project, index) => (
+                  <div
+                    key={project.id}
+                    className="group relative aspect-square bg-white/10 rounded-lg overflow-hidden hover:bg-white/20 transition-all duration-300"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-amber-600/10 group-hover:from-amber-500/30 group-hover:to-amber-600/20 transition-all duration-300" />
+                    <div className="absolute bottom-2 left-2 right-2">
+                      <h4
+                        className="text-xs font-medium truncate transition-colors duration-300"
+                        style={{ color: theme.colors.text }}
+                      >
+                        {project.name}
+                      </h4>
+                      <p
+                        className="text-xs opacity-70 truncate transition-colors duration-300"
+                        style={{ color: theme.colors.text }}
+                      >
+                        {project.tech[0]}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Floating decoration */}
+              <div className="absolute top-4 right-4 w-6 h-6 border-2 border-white/20 rounded-full animate-pulse"></div>
+            </div>
+
+            {/* Contact Widget */}
+            <div
+              ref={(el) => (widgetRefs.current["contact"] = el)}
+              className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${cardHoverClass}`}
+              style={{ backgroundColor: theme.colors.contact }}
+              onClick={() => handleWidgetClick("contact")}
+            >
+              <div className="text-4xl mb-4">✉️</div>
+              <h3
+                className="text-xl font-light mb-3 transition-colors duration-300"
+                style={{
+                  color: theme.colors.text,
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
+                Get In Touch
+              </h3>
+              <p
+                className="text-sm opacity-80 mb-4 transition-colors duration-300"
+                style={{ color: theme.colors.text }}
+              >
+                Let's discuss your next project and create something amazing
+                together.
+              </p>
+
+              {/* Contact methods preview */}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-xs opacity-70">
+                  <span>📧</span>
+                  <span style={{ color: theme.colors.text }}>
+                    hello@johndoe.dev
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs opacity-70">
+                  <span>💼</span>
+                  <span style={{ color: theme.colors.text }}>LinkedIn</span>
+                </div>
+              </div>
+
+              {/* Animated envelope */}
+              <div className="absolute bottom-4 right-4">
+                <div className="w-8 h-6 border-2 border-white/30 rounded-sm relative">
+                  <div className="absolute inset-1 border border-white/20"></div>
+                  <div className="absolute top-1 left-1 w-2 h-1 bg-white/20 rounded"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Theme Selector */}
         <div className="fixed bottom-6 right-6 z-40">
           {showThemeSelector && (
-            <div className="absolute bottom-full right-0 mb-4 p-4 bg-black/80 backdrop-blur-md rounded-2xl border border-white/20">
+            <div className="absolute bottom-full right-0 mb-4 p-4 bg-black/80 backdrop-blur-md rounded-2xl border border-white/20 animate-fadeIn">
               <div className="space-y-3">
                 {colorThemes.map((themeOption) => (
                   <button
                     key={themeOption.id}
                     onClick={() => handleThemeChange(themeOption.id)}
-                    className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                    className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-white/10 transition-all duration-200 group"
                   >
                     <div className="flex space-x-1">
                       <div
-                        className="w-3 h-3 rounded-full"
+                        className="w-3 h-3 rounded-full transition-transform duration-200 group-hover:scale-110"
                         style={{ backgroundColor: themeOption.colors.hero }}
                       />
                       <div
-                        className="w-3 h-3 rounded-full"
+                        className="w-3 h-3 rounded-full transition-transform duration-200 group-hover:scale-110"
                         style={{ backgroundColor: themeOption.colors.primary }}
                       />
                     </div>
@@ -575,7 +1520,7 @@ export default function Index() {
                       {themeOption.name}
                     </span>
                     {currentTheme === themeOption.id && (
-                      <div className="ml-auto w-2 h-2 rounded-full bg-green-400" />
+                      <div className="ml-auto w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
                     )}
                   </button>
                 ))}
@@ -606,17 +1551,22 @@ export default function Index() {
 
       {/* ==================== EXPANSION MODAL ==================== */}
       {expandedWidget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
           <div
-            className="relative w-full max-w-2xl max-h-[90vh] mx-4 rounded-2xl p-8 shadow-2xl overflow-y-auto"
+            className="relative w-full max-w-2xl max-h-[90vh] mx-4 rounded-2xl p-8 shadow-2xl overflow-y-auto animate-slideIn custom-scrollbar"
             style={{ backgroundColor: theme.colors.background }}
           >
+            {/* Close Button */}
             <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+              onClick={() => {
+                setExpandedWidget(null);
+                setClickedWidget(null);
+                setWidgetPosition(null);
+              }}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-all duration-200 flex items-center justify-center z-10 group"
             >
               <svg
-                className="w-4 h-4"
+                className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200"
                 fill="none"
                 stroke="currentColor"
                 style={{ color: theme.colors.text }}
@@ -631,22 +1581,51 @@ export default function Index() {
               </svg>
             </button>
 
+            {/* Dynamic Expanded Content */}
             {renderExpandedContent(expandedWidget)}
           </div>
         </div>
       )}
 
-      {/* ==================== STYLES ==================== */}
+      {/* ==================== CUSTOM STYLES ==================== */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+        
+        * {
+          font-family: 'Inter', sans-serif;
+        }
+        
         .animate-fadeIn {
-          animation: fadeIn 1s ease-in-out;
+          animation: fadeIn 0.5s ease-out;
+        }
+        
+        .animate-slideIn {
+          animation: slideIn 0.3s ease-out;
         }
         
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { 
+            opacity: 0; 
+            transform: translateY(10px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
         }
         
+        @keyframes slideIn {
+          from { 
+            opacity: 0; 
+            transform: scale(0.95) translateY(10px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: scale(1) translateY(0); 
+          }
+        }
+        
+        /* Custom scrollbar for expanded content */
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
@@ -660,6 +1639,24 @@ export default function Index() {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(216, 207, 188, 0.5);
+        }
+        
+        /* Smooth transitions for all interactive elements */
+        button, a, div[role="button"] {
+          transition: all 0.2s ease-out;
+        }
+        
+        /* Enhanced hover effects */
+        .group:hover .group-hover\\:scale-110 {
+          transform: scale(1.1);
+        }
+        
+        .group:hover .group-hover\\:opacity-40 {
+          opacity: 0.4;
+        }
+        
+        .group:hover .group-hover\\:animate-bounce {
+          animation: bounce 1s infinite;
         }
       `}</style>
     </>
