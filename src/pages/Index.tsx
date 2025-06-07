@@ -563,11 +563,6 @@ const Index = () => {
   };
 
   /**
-   * EXPANSION STYLE STATE - Calculated via useEffect to prevent re-render issues
-   */
-  const [expansionStyle, setExpansionStyle] = useState<React.CSSProperties>({});
-
-  /**
    * MEMOIZED WIDGET BACKGROUND COLOR - Prevents repeated calculations
    */
   const widgetBackgroundColor = useMemo(() => {
