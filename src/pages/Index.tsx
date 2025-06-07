@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 /**
- * Polished Bentolio Portfolio Website
- * Features viewport-aware widget expansion with blur effects and navigation integration
+ * Perfect Bentolio Portfolio Website
+ * Features overlay popup expansion with dynamic blur effects
  */
 
 // Types for better organization
@@ -23,6 +23,13 @@ interface Project {
   featured: boolean;
 }
 
+interface WidgetPosition {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
 const Index = () => {
   // ==================== STATE MANAGEMENT ====================
   const [progress, setProgress] = useState(0);
@@ -35,6 +42,12 @@ const Index = () => {
   const [clickedWidget, setClickedWidget] = useState<string | null>(null);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
   const [skillAnimations, setSkillAnimations] = useState(false);
+  const [widgetPosition, setWidgetPosition] = useState<WidgetPosition | null>(
+    null,
+  );
+
+  // Refs for widget elements
+  const widgetRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // ==================== DATA STRUCTURES ====================
 
@@ -223,7 +236,7 @@ const Index = () => {
 
   // ==================== HELPER FUNCTIONS ====================
 
-  // Handle widget expansion with stable hover and click
+  // Handle widget expansion with overlay popup
   const handleWidgetInteraction = (
     widgetName: string,
     action: "hover" | "leave" | "click",
@@ -239,7 +252,18 @@ const Index = () => {
       if (clickedWidget === widgetName) {
         setClickedWidget(null);
         setExpandedWidget(null);
+        setWidgetPosition(null);
       } else {
+        const element = widgetRefs.current[widgetName];
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          setWidgetPosition({
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+          });
+        }
         setClickedWidget(widgetName);
         setExpandedWidget(widgetName);
       }
@@ -247,6 +271,16 @@ const Index = () => {
       // Only expand on hover if not clicked
       if (!clickedWidget) {
         const timer = setTimeout(() => {
+          const element = widgetRefs.current[widgetName];
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            setWidgetPosition({
+              top: rect.top,
+              left: rect.left,
+              width: rect.width,
+              height: rect.height,
+            });
+          }
           setExpandedWidget(widgetName);
         }, 1000);
         setHoverTimer(timer);
@@ -256,6 +290,7 @@ const Index = () => {
       if (!clickedWidget) {
         const timer = setTimeout(() => {
           setExpandedWidget(null);
+          setWidgetPosition(null);
         }, 300);
         setHoverTimer(timer);
       }
@@ -272,6 +307,16 @@ const Index = () => {
 
     const targetWidget = widgetMap[section];
     if (targetWidget) {
+      const element = widgetRefs.current[targetWidget];
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setWidgetPosition({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        });
+      }
       setClickedWidget(targetWidget);
       setExpandedWidget(targetWidget);
     }
@@ -282,29 +327,26 @@ const Index = () => {
     return expandedWidget === widgetName;
   };
 
-  // Get viewport-aware expansion transform
-  const getExpansionTransform = (widgetName: string, element?: HTMLElement) => {
-    if (!isWidgetExpanded(widgetName) || !element) {
-      return { transform: "", zIndex: 10 };
-    }
+  // Get expansion transform for overlay
+  const getOverlayTransform = () => {
+    if (!widgetPosition) return {};
 
-    const rect = element.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const viewportCenterX = window.innerWidth / 2;
+    const viewportCenterY = window.innerHeight / 2;
+    const widgetCenterX = widgetPosition.left + widgetPosition.width / 2;
+    const widgetCenterY = widgetPosition.top + widgetPosition.height / 2;
 
-    // Calculate how much to translate toward center
-    const centerX = viewportWidth / 2;
-    const centerY = viewportHeight / 2;
-    const elementCenterX = rect.left + rect.width / 2;
-    const elementCenterY = rect.top + rect.height / 2;
+    // Calculate how much to move toward center
+    const deltaX = viewportCenterX - widgetCenterX;
+    const deltaY = viewportCenterY - widgetCenterY;
 
-    // Calculate translation to move toward center (but not completely)
-    const translateX = (centerX - elementCenterX) * 0.3;
-    const translateY = (centerY - elementCenterY) * 0.2;
+    // Move 40% of the way toward center
+    const translateX = deltaX * 0.4;
+    const translateY = deltaY * 0.4;
 
     return {
-      transform: `translate(${translateX}px, ${translateY}px) scale(1.2)`,
-      zIndex: 100,
+      transform: `translate(${translateX}px, ${translateY}px) scale(1.5)`,
+      transformOrigin: "center center",
     };
   };
 
@@ -387,6 +429,447 @@ const Index = () => {
       </button>
     </div>
   );
+
+  // Render expanded widget overlay content
+  const renderExpandedContent = (widgetName: string) => {
+    switch (widgetName) {
+      case "hero":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3
+                className="text-2xl font-medium mb-4"
+                style={{
+                  color: "rgb(216, 207, 188)",
+                  fontFamily: "Playfair Display, serif",
+                }}
+              >
+                Our Mission
+              </h3>
+              <p
+                className="text-sm opacity-80 leading-relaxed mb-4"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                We believe in creating digital experiences that not only look
+                beautiful but solve real problems and create meaningful
+                connections between brands and their audiences.
+              </p>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4
+                className="font-medium mb-3"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Our Services
+              </h4>
+              <ul
+                className="space-y-2 text-sm opacity-80"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <li>• Full-stack Web Development</li>
+                <li>• UI/UX Design & Prototyping</li>
+                <li>• Mobile App Development</li>
+                <li>• Design System Creation</li>
+                <li>• Performance Optimization</li>
+              </ul>
+            </div>
+
+            <div className="pt-4">
+              <button className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
+                Start a Project
+              </button>
+            </div>
+          </div>
+        );
+
+      case "profile":
+        return (
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-16 h-16 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-10 h-10 text-gray-600"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                  </svg>
+                </div>
+              </div>
+              <div
+                className="text-lg font-medium mb-1"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                John Doe
+              </div>
+              <div
+                className="text-xs opacity-70 mb-3"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Senior Creative Developer
+              </div>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4
+                className="font-medium mb-2"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Achievements
+              </h4>
+              <ul
+                className="space-y-1 text-xs opacity-80"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <li>🏆 Awwwards Site of the Day (2023)</li>
+                <li>🎖️ CSS Design Awards Winner</li>
+                <li>📜 Google Developer Expert</li>
+                <li>🌟 10+ successful product launches</li>
+              </ul>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4
+                className="font-medium mb-2"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Certifications
+              </h4>
+              <ul
+                className="space-y-1 text-xs opacity-80"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <li>• AWS Solutions Architect</li>
+                <li>• Google UX Design Certificate</li>
+                <li>• React Advanced Patterns</li>
+              </ul>
+            </div>
+
+            <button className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
+              Download Resume
+            </button>
+          </div>
+        );
+
+      case "about":
+        return (
+          <div className="space-y-4">
+            <h3
+              className="text-xl font-medium mb-4"
+              style={{
+                color: "rgb(216, 207, 188)",
+                fontFamily: "Playfair Display, serif",
+              }}
+            >
+              About Me
+            </h3>
+            <p
+              className="text-sm opacity-80 leading-relaxed"
+              style={{ color: "rgb(216, 207, 188)" }}
+            >
+              I'm a passionate creative developer with over 5 years of
+              experience in crafting digital experiences that bridge the gap
+              between design and technology.
+            </p>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4
+                className="font-medium mb-2"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Experience Timeline
+              </h4>
+              <div
+                className="space-y-2 text-xs opacity-80"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <div className="flex justify-between">
+                  <span>Senior Frontend Developer</span>
+                  <span>2023-Present</span>
+                </div>
+                <div className="text-xs opacity-60">
+                  TechCorp - Leading innovation team
+                </div>
+
+                <div className="flex justify-between mt-2">
+                  <span>Full Stack Developer</span>
+                  <span>2021-2023</span>
+                </div>
+                <div className="text-xs opacity-60">
+                  StartupXYZ - Built MVP to 100k+ users
+                </div>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4
+                className="font-medium mb-2"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Philosophy
+              </h4>
+              <p
+                className="text-xs opacity-80 leading-relaxed"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                I believe great software isn't just about code—it's about
+                understanding users, solving real problems, and creating
+                experiences that feel intuitive and delightful.
+              </p>
+            </div>
+          </div>
+        );
+
+      case "skills":
+        return (
+          <div className="space-y-4">
+            <h3
+              className="text-xl font-medium mb-4"
+              style={{
+                color: "rgb(216, 207, 188)",
+                fontFamily: "Playfair Display, serif",
+              }}
+            >
+              Skills & Expertise
+            </h3>
+            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+              {allSkills.map((skill, index) => (
+                <div
+                  key={skill.name}
+                  className="border-l-2 border-amber-500/20 pl-3 pb-2"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      {skill.name}
+                    </span>
+                    <span
+                      className="text-xs opacity-60"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      {skill.level}%
+                    </span>
+                  </div>
+
+                  {/* Animated Progress Bar */}
+                  <div className="w-full h-1 bg-white/10 rounded-full mb-1 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: skillAnimations ? `${skill.level}%` : "0%",
+                        transitionDelay: `${index * 100}ms`,
+                      }}
+                    ></div>
+                  </div>
+
+                  <div
+                    className="text-xs opacity-70"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    {skill.description}
+                  </div>
+                  <div
+                    className="text-xs opacity-50 mt-1"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    {skill.category}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "location":
+        return (
+          <div className="space-y-4">
+            <h3
+              className="text-xl font-medium mb-4"
+              style={{
+                color: "rgb(216, 207, 188)",
+                fontFamily: "Playfair Display, serif",
+              }}
+            >
+              Location & Availability
+            </h3>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🌍</div>
+              <div
+                className="font-medium"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                San Francisco, California
+              </div>
+              <div
+                className="text-xs opacity-70"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                United States
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <div
+                  className="text-xs opacity-70 mb-1"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  Local Time
+                </div>
+                <div
+                  className="font-medium text-xs"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  {new Date().toLocaleTimeString("en-US", {
+                    timeZone: "America/Los_Angeles",
+                    hour12: true,
+                  })}
+                </div>
+              </div>
+              <div className="text-center p-3 bg-white/5 rounded-lg">
+                <div
+                  className="text-xs opacity-70 mb-1"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  Time Zone
+                </div>
+                <div
+                  className="font-medium text-xs"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  UTC-8
+                </div>
+              </div>
+            </div>
+
+            <div className="border-l-2 border-amber-500/30 pl-4">
+              <h4
+                className="font-medium mb-2"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Work Preferences
+              </h4>
+              <ul
+                className="space-y-1 text-xs opacity-80"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <li>🏠 Remote work available</li>
+                <li>🤝 On-site meetings in SF Bay Area</li>
+                <li>✈️ Travel for projects worldwide</li>
+                <li>🕐 Flexible working hours</li>
+              </ul>
+            </div>
+          </div>
+        );
+
+      case "projects":
+        return (
+          <div className="space-y-4">
+            <h3
+              className="text-xl font-medium mb-4"
+              style={{
+                color: "rgb(216, 207, 188)",
+                fontFamily: "Playfair Display, serif",
+              }}
+            >
+              All Projects
+            </h3>
+            <div className="grid grid-cols-2 gap-4 max-h-80 overflow-y-auto custom-scrollbar">
+              {allProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors duration-300"
+                >
+                  <div className="w-full h-16 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-3"></div>
+                  <h4
+                    className="text-sm font-medium mb-2"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    {project.name}
+                  </h4>
+                  <p
+                    className="text-xs opacity-70 mb-3 leading-relaxed"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    {project.description.slice(0, 80)}...
+                  </p>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {project.tech.slice(0, 3).map((tech) => (
+                      <span
+                        key={tech}
+                        className="text-xs px-2 py-1 bg-white/10 rounded"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    className="w-full py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-xs font-medium rounded hover:from-amber-500/40 hover:to-amber-600/40 transition-all duration-300"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    Visit Project →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "contact":
+        return (
+          <div className="space-y-4">
+            <h3
+              className="text-xl font-medium mb-4"
+              style={{
+                color: "rgb(216, 207, 188)",
+                fontFamily: "Playfair Display, serif",
+              }}
+            >
+              Get In Touch
+            </h3>
+            <ContactForm />
+
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <h4
+                className="text-sm font-medium mb-3"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                Other ways to reach me
+              </h4>
+              <div
+                className="space-y-2 text-xs"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <div className="flex items-center opacity-80">
+                  <span className="mr-3">📧</span>
+                  hello@johndoe.dev
+                </div>
+                <div className="flex items-center opacity-80">
+                  <span className="mr-3">📱</span>
+                  +1 (555) 123-4567
+                </div>
+                <div className="flex items-center opacity-80">
+                  <span className="mr-3">💼</span>
+                  linkedin.com/in/johndoe
+                </div>
+                <div className="flex items-center opacity-80">
+                  <span className="mr-3">🐙</span>
+                  github.com/johndoe
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <>
@@ -527,11 +1010,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* ==================== BLUR BACKDROP FOR EXPANDED WIDGETS ==================== */}
-        {expandedWidget && (
-          <div className="fixed inset-0 z-50 pointer-events-none">
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-          </div>
+        {/* ==================== DYNAMIC BLUR BACKDROP ==================== */}
+        {expandedWidget && widgetPosition && (
+          <div
+            className="fixed inset-0 z-40 pointer-events-none transition-opacity duration-500"
+            style={{
+              background: `radial-gradient(circle at ${widgetPosition.left + widgetPosition.width / 2}px ${widgetPosition.top + widgetPosition.height / 2}px, transparent 100px, rgba(0,0,0,0.6) 300px)`,
+              backdropFilter: `blur(8px)`,
+            }}
+          />
         )}
 
         {/* ==================== MAIN PORTFOLIO CONTENT ==================== */}
@@ -542,11 +1029,7 @@ const Index = () => {
         >
           <div className="grid grid-cols-12 gap-[14px] min-h-screen relative z-10">
             {/* ==================== HEADER SECTION (NO BLUR) ==================== */}
-            <div
-              className={`col-span-12 h-20 flex items-center justify-between px-6 backdrop-blur-sm relative z-[150] ${
-                expandedWidget ? "" : ""
-              }`}
-            >
+            <div className="col-span-12 h-20 flex items-center justify-between px-6 backdrop-blur-sm relative z-50">
               <div
                 className="text-3xl font-light tracking-wide relative group"
                 style={{
@@ -573,34 +1056,17 @@ const Index = () => {
               </div>
             </div>
 
-            {/* ==================== MAIN CONTENT GRID (WITH BLUR FILTER) ==================== */}
-            <div
-              className={`col-span-12 grid grid-cols-12 gap-[14px] pb-[14px] transition-all duration-500 ${
-                expandedWidget ? "blur-sm" : "blur-0"
-              }`}
-            >
-              {/* ==================== HERO SECTION WITH EXPANSION ==================== */}
+            {/* ==================== MAIN CONTENT GRID ==================== */}
+            <div className="col-span-12 grid grid-cols-12 gap-[14px] pb-[14px]">
+              {/* ==================== HERO SECTION ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("hero")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "hero",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-8 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["hero"] = el)}
+                className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("hero")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(86, 84, 73)",
-                  height: isWidgetExpanded("hero") ? "400px" : "320px",
-                  zIndex: isWidgetExpanded("hero") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(86, 84, 73)" }}
                 onMouseEnter={() => handleWidgetInteraction("hero", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("hero", "leave")}
                 onClick={() => handleWidgetInteraction("hero", "click")}
@@ -609,122 +1075,34 @@ const Index = () => {
                 <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white/10 animate-spin"></div>
                 <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full bg-white/5"></div>
 
-                {/* Base Content */}
-                <div
-                  className={`transition-all duration-500 ${isWidgetExpanded("hero") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                <h1
+                  className="text-6xl md:text-8xl font-light mb-4 group-hover:scale-105 transition-transform duration-300"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <h1
-                    className="text-6xl md:text-8xl font-light mb-4 transition-transform duration-300"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Creative
-                  </h1>
-                  <h1
-                    className="text-6xl md:text-8xl font-light mb-6 transition-transform duration-300"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Developer
-                  </h1>
-                  <p
-                    className="text-lg opacity-80 max-w-md transition-opacity duration-300"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    Crafting digital experiences through innovative design and
-                    development
-                  </p>
-                </div>
-
-                {/* Expanded Content */}
-                <div
-                  className={`absolute inset-8 transition-all duration-500 ${
-                    isWidgetExpanded("hero")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
+                  Creative
+                </h1>
+                <h1
+                  className="text-6xl md:text-8xl font-light mb-6 group-hover:scale-105 transition-transform duration-300"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <div className="space-y-6">
-                    <div>
-                      <h3
-                        className="text-2xl font-medium mb-4"
-                        style={{
-                          color: "rgb(216, 207, 188)",
-                          fontFamily: "Playfair Display, serif",
-                        }}
-                      >
-                        Our Mission
-                      </h3>
-                      <p
-                        className="text-sm opacity-80 leading-relaxed mb-4"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        We believe in creating digital experiences that not only
-                        look beautiful but solve real problems and create
-                        meaningful connections between brands and their
-                        audiences.
-                      </p>
-                    </div>
-
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4
-                        className="font-medium mb-3"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Our Services
-                      </h4>
-                      <ul
-                        className="space-y-2 text-sm opacity-80"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        <li>• Full-stack Web Development</li>
-                        <li>• UI/UX Design & Prototyping</li>
-                        <li>• Mobile App Development</li>
-                        <li>• Design System Creation</li>
-                        <li>• Performance Optimization</li>
-                      </ul>
-                    </div>
-
-                    <div className="pt-4">
-                      <button className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
-                        Start a Project
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("hero") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
+                  Developer
+                </h1>
+                <p
+                  className="text-lg opacity-80 max-w-md group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  Crafting digital experiences through innovative design and
+                  development
+                </p>
 
                 <svg
-                  className="absolute top-1/2 right-8 w-6 h-6 opacity-20 transition-opacity duration-300"
+                  className="absolute top-1/2 right-8 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
                   style={{ color: "rgb(216, 207, 188)" }}
                 >
@@ -732,530 +1110,164 @@ const Index = () => {
                 </svg>
               </div>
 
-              {/* ==================== PROFILE CARD WITH EXPANSION ==================== */}
+              {/* ==================== PROFILE CARD ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("profile")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "profile",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-4 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["profile"] = el)}
+                className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("profile")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(45, 46, 40)",
-                  height: isWidgetExpanded("profile") ? "400px" : "320px",
-                  zIndex: isWidgetExpanded("profile") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(45, 46, 40)" }}
                 onMouseEnter={() => handleWidgetInteraction("profile", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("profile", "leave")}
                 onClick={() => handleWidgetInteraction("profile", "click")}
               >
-                {/* Base Content */}
-                <div
-                  className={`flex flex-col items-center justify-center text-center h-full transition-all duration-500 ${
-                    isWidgetExpanded("profile")
-                      ? "opacity-0 pointer-events-none"
-                      : "opacity-100"
-                  }`}
-                >
-                  <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 transition-transform duration-300 shadow-xl">
-                    <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
-                      <svg
-                        className="w-12 h-12 text-gray-600"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
-                    </div>
+                <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl">
+                  <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-12 h-12 text-gray-600"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
                   </div>
-                  <h3
-                    className="text-xl font-medium mb-2"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    John Doe
-                  </h3>
-                  <p
-                    className="text-sm opacity-70 transition-opacity duration-300"
+                </div>
+                <h3
+                  className="text-xl font-medium mb-2"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
+                >
+                  John Doe
+                </h3>
+                <p
+                  className="text-sm opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  UI/UX Designer & Developer
+                </p>
+
+                <div className="flex items-center mt-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
+                  <span
+                    className="text-xs"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    UI/UX Designer & Developer
-                  </p>
-
-                  <div className="flex items-center mt-4 opacity-60 transition-opacity duration-300">
-                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mr-2"></div>
-                    <span
-                      className="text-xs"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      Available for work
-                    </span>
-                  </div>
+                    Available for work
+                  </span>
                 </div>
-
-                {/* Expanded Content */}
-                <div
-                  className={`absolute inset-6 transition-all duration-500 ${
-                    isWidgetExpanded("profile")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
-                >
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="w-20 h-20 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <div className="w-16 h-16 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-10 h-10 text-gray-600"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div
-                        className="text-lg font-medium mb-1"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        John Doe
-                      </div>
-                      <div
-                        className="text-xs opacity-70 mb-3"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Senior Creative Developer
-                      </div>
-                    </div>
-
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4
-                        className="font-medium mb-2"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Achievements
-                      </h4>
-                      <ul
-                        className="space-y-1 text-xs opacity-80"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        <li>🏆 Awwwards Site of the Day (2023)</li>
-                        <li>🎖️ CSS Design Awards Winner</li>
-                        <li>📜 Google Developer Expert</li>
-                        <li>🌟 10+ successful product launches</li>
-                      </ul>
-                    </div>
-
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4
-                        className="font-medium mb-2"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Certifications
-                      </h4>
-                      <ul
-                        className="space-y-1 text-xs opacity-80"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        <li>• AWS Solutions Architect</li>
-                        <li>• Google UX Design Certificate</li>
-                        <li>• React Advanced Patterns</li>
-                      </ul>
-                    </div>
-
-                    <button className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
-                      Download Resume
-                    </button>
-                  </div>
-                </div>
-
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("profile") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
               </div>
 
-              {/* ==================== ABOUT SECTION WITH EXPANSION ==================== */}
+              {/* ==================== ABOUT SECTION ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("about")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "about",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-6 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["about"] = el)}
+                className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("about")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(35, 36, 30)",
-                  height: isWidgetExpanded("about") ? "350px" : "240px",
-                  zIndex: isWidgetExpanded("about") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(35, 36, 30)" }}
                 onMouseEnter={() => handleWidgetInteraction("about", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("about", "leave")}
                 onClick={() => handleWidgetInteraction("about", "click")}
               >
                 <svg
-                  className="absolute top-4 right-4 w-8 h-8 opacity-20 transition-opacity duration-300"
+                  className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
                   style={{ color: "rgb(216, 207, 188)" }}
                 >
                   <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
                 </svg>
 
-                {/* Base Content */}
-                <div
-                  className={`transition-all duration-500 ${isWidgetExpanded("about") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                <h3
+                  className="text-2xl font-light mb-4"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <h3
-                    className="text-2xl font-light mb-4"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    About Me
-                  </h3>
-                  <p
-                    className="text-sm leading-relaxed opacity-80 transition-opacity duration-300"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    I'm a passionate creative developer with over 5 years of
-                    experience in crafting digital experiences. I specialize in
-                    React, Next.js, and modern web technologies.
-                  </p>
-                </div>
-
-                {/* Expanded Content */}
-                <div
-                  className={`absolute inset-6 transition-all duration-500 ${
-                    isWidgetExpanded("about")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
+                  About Me
+                </h3>
+                <p
+                  className="text-sm leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ color: "rgb(216, 207, 188)" }}
                 >
-                  <div className="space-y-4">
-                    <h3
-                      className="text-xl font-medium mb-4"
-                      style={{
-                        color: "rgb(216, 207, 188)",
-                        fontFamily: "Playfair Display, serif",
-                      }}
-                    >
-                      About Me
-                    </h3>
-                    <p
-                      className="text-sm opacity-80 leading-relaxed"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      I'm a passionate creative developer with over 5 years of
-                      experience in crafting digital experiences that bridge the
-                      gap between design and technology.
-                    </p>
-
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4
-                        className="font-medium mb-2"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Experience Timeline
-                      </h4>
-                      <div
-                        className="space-y-2 text-xs opacity-80"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        <div className="flex justify-between">
-                          <span>Senior Frontend Developer</span>
-                          <span>2023-Present</span>
-                        </div>
-                        <div className="text-xs opacity-60">
-                          TechCorp - Leading innovation team
-                        </div>
-
-                        <div className="flex justify-between mt-2">
-                          <span>Full Stack Developer</span>
-                          <span>2021-2023</span>
-                        </div>
-                        <div className="text-xs opacity-60">
-                          StartupXYZ - Built MVP to 100k+ users
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4
-                        className="font-medium mb-2"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Philosophy
-                      </h4>
-                      <p
-                        className="text-xs opacity-80 leading-relaxed"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        I believe great software isn't just about code—it's
-                        about understanding users, solving real problems, and
-                        creating experiences that feel intuitive and delightful.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("about") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
+                  I'm a passionate creative developer with over 5 years of
+                  experience in crafting digital experiences. I specialize in
+                  React, Next.js, and modern web technologies.
+                </p>
               </div>
 
-              {/* ==================== SKILLS SECTION WITH EXPANSION ==================== */}
+              {/* ==================== SKILLS SECTION ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("skills")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "skills",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-3 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["skills"] = el)}
+                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("skills")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(55, 56, 50)",
-                  height: isWidgetExpanded("skills") ? "400px" : "240px",
-                  zIndex: isWidgetExpanded("skills") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(55, 56, 50)" }}
                 onMouseEnter={() => handleWidgetInteraction("skills", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("skills", "leave")}
                 onClick={() => handleWidgetInteraction("skills", "click")}
               >
-                {/* Base Content */}
-                <div
-                  className={`transition-all duration-500 ${isWidgetExpanded("skills") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                <h3
+                  className="text-xl font-light mb-4"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <h3
-                    className="text-xl font-light mb-4"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Skills
-                  </h3>
+                  Skills
+                </h3>
 
-                  <div className="space-y-3 relative">
-                    {getVisibleSkills().map((skill, index) => (
-                      <div
-                        key={skill.name}
-                        className="flex items-center text-sm transition-all duration-300 hover:translate-x-2"
-                        style={{
-                          color: "rgb(216, 207, 188)",
-                          opacity: skill.opacity,
-                        }}
-                      >
-                        <div className="w-2 h-2 rounded-full mr-3 bg-current opacity-60"></div>
-                        {skill.name}
-                      </div>
-                    ))}
-
-                    {/* Fade overlay for bottom */}
+                <div className="space-y-3 relative">
+                  {getVisibleSkills().map((skill, index) => (
                     <div
-                      className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+                      key={skill.name}
+                      className="flex items-center text-sm group-hover:translate-x-2 transition-all duration-300"
                       style={{
-                        background:
-                          "linear-gradient(to bottom, transparent, rgb(55, 56, 50))",
+                        color: "rgb(216, 207, 188)",
+                        opacity: skill.opacity,
                       }}
-                    />
-                  </div>
-
-                  <div className="absolute bottom-4 left-6 right-6">
-                    <div
-                      className="text-xs opacity-60 mb-2"
-                      style={{ color: "rgb(216, 207, 188)" }}
                     >
-                      Click to see all
+                      <div className="w-2 h-2 rounded-full mr-3 bg-current opacity-60"></div>
+                      {skill.name}
                     </div>
-                  </div>
-                </div>
+                  ))}
 
-                {/* Expanded Content */}
-                <div
-                  className={`absolute inset-6 transition-all duration-500 ${
-                    isWidgetExpanded("skills")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
-                >
-                  <h3
-                    className="text-xl font-medium mb-4"
+                  {/* Fade overlay for bottom */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
                     style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
+                      background:
+                        "linear-gradient(to bottom, transparent, rgb(55, 56, 50))",
                     }}
-                  >
-                    Skills & Expertise
-                  </h3>
-                  <div className="space-y-3">
-                    {allSkills.map((skill, index) => (
-                      <div
-                        key={skill.name}
-                        className="border-l-2 border-amber-500/20 pl-3 pb-2"
-                      >
-                        <div className="flex justify-between items-center mb-1">
-                          <span
-                            className="text-sm font-medium"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            {skill.name}
-                          </span>
-                          <span
-                            className="text-xs opacity-60"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            {skill.level}%
-                          </span>
-                        </div>
-
-                        {/* Animated Progress Bar */}
-                        <div className="w-full h-1 bg-white/10 rounded-full mb-1 overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-1000 ease-out"
-                            style={{
-                              width: skillAnimations ? `${skill.level}%` : "0%",
-                              transitionDelay: `${index * 100}ms`,
-                            }}
-                          ></div>
-                        </div>
-
-                        <div
-                          className="text-xs opacity-70"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {skill.description}
-                        </div>
-                        <div
-                          className="text-xs opacity-50 mt-1"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {skill.category}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  />
                 </div>
 
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("skills") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                <div className="absolute bottom-4 left-6 right-6">
+                  <div
+                    className="text-xs opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
+                    Click to see all
+                  </div>
+                </div>
               </div>
 
-              {/* ==================== LOCATION CARD WITH EXPANSION ==================== */}
+              {/* ==================== LOCATION CARD ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("location")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "location",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-3 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["location"] = el)}
+                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("location")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(65, 66, 60)",
-                  height: isWidgetExpanded("location") ? "350px" : "240px",
-                  zIndex: isWidgetExpanded("location") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(65, 66, 60)" }}
                 onMouseEnter={() =>
                   handleWidgetInteraction("location", "hover")
                 }
@@ -1264,181 +1276,44 @@ const Index = () => {
                 }
                 onClick={() => handleWidgetInteraction("location", "click")}
               >
-                {/* Base Content */}
-                <div
-                  className={`flex flex-col justify-center text-center h-full transition-all duration-500 ${
-                    isWidgetExpanded("location")
-                      ? "opacity-0 pointer-events-none"
-                      : "opacity-100"
-                  }`}
+                <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
+                  🌍
+                </div>
+                <h3
+                  className="text-lg font-light mb-2"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <div className="text-5xl mb-4 transition-all duration-300">
-                    🌍
-                  </div>
-                  <h3
-                    className="text-lg font-light mb-2"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Based in
-                  </h3>
-                  <p
-                    className="text-sm opacity-80 transition-opacity duration-300"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    San Francisco, CA
-                  </p>
-                  <div
-                    className="mt-3 text-xs opacity-60 transition-opacity duration-300"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    UTC-8 (PST)
-                  </div>
+                  Based in
+                </h3>
+                <p
+                  className="text-sm opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  San Francisco, CA
+                </p>
+                <div
+                  className="mt-3 text-xs opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+                  style={{ color: "rgb(216, 207, 188)" }}
+                >
+                  UTC-8 (PST)
                 </div>
 
-                {/* Expanded Content */}
-                <div
-                  className={`absolute inset-6 transition-all duration-500 ${
-                    isWidgetExpanded("location")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
-                >
-                  <div className="space-y-4">
-                    <h3
-                      className="text-xl font-medium mb-4"
-                      style={{
-                        color: "rgb(216, 207, 188)",
-                        fontFamily: "Playfair Display, serif",
-                      }}
-                    >
-                      Location & Availability
-                    </h3>
-                    <div className="text-center">
-                      <div className="text-4xl mb-2">🌍</div>
-                      <div
-                        className="font-medium"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        San Francisco, California
-                      </div>
-                      <div
-                        className="text-xs opacity-70"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        United States
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div
-                          className="text-xs opacity-70 mb-1"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          Local Time
-                        </div>
-                        <div
-                          className="font-medium text-xs"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          {new Date().toLocaleTimeString("en-US", {
-                            timeZone: "America/Los_Angeles",
-                            hour12: true,
-                          })}
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-white/5 rounded-lg">
-                        <div
-                          className="text-xs opacity-70 mb-1"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          Time Zone
-                        </div>
-                        <div
-                          className="font-medium text-xs"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          UTC-8
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="border-l-2 border-amber-500/30 pl-4">
-                      <h4
-                        className="font-medium mb-2"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        Work Preferences
-                      </h4>
-                      <ul
-                        className="space-y-1 text-xs opacity-80"
-                        style={{ color: "rgb(216, 207, 188)" }}
-                      >
-                        <li>🏠 Remote work available</li>
-                        <li>🤝 On-site meetings in SF Bay Area</li>
-                        <li>✈️ Travel for projects worldwide</li>
-                        <li>🕐 Flexible working hours</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("location") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
-
-                {/* Decorative Elements */}
                 <div className="absolute top-2 right-2 w-3 h-3 rounded-full bg-white/20 animate-pulse"></div>
                 <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-white/10"></div>
               </div>
 
-              {/* ==================== PROJECTS SECTION WITH EXPANSION ==================== */}
+              {/* ==================== PROJECTS SECTION ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("projects")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "projects",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-8 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["projects"] = el)}
+                className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("projects")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(75, 76, 70)",
-                  height: isWidgetExpanded("projects") ? "450px" : "240px",
-                  zIndex: isWidgetExpanded("projects") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(75, 76, 70)" }}
                 onMouseEnter={() =>
                   handleWidgetInteraction("projects", "hover")
                 }
@@ -1447,170 +1322,66 @@ const Index = () => {
                 }
                 onClick={() => handleWidgetInteraction("projects", "click")}
               >
-                {/* Base Content */}
-                <div
-                  className={`transition-all duration-500 ${isWidgetExpanded("projects") ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                <h3
+                  className="text-2xl font-light mb-4"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <h3
-                    className="text-2xl font-light mb-4"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Recent Work
-                  </h3>
+                  Recent Work
+                </h3>
 
-                  <div className="grid grid-cols-3 gap-4 h-32">
-                    {getFeaturedProjects().map((project, i) => (
-                      <div
-                        key={project.id}
-                        className="bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group/project hover:scale-105"
-                      >
-                        <div className="w-full h-8 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-2 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
-                        <div>
-                          <div
-                            className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            {project.name}
-                          </div>
-                          <div
-                            className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            {project.tech.slice(0, 2).join(", ")}
-                          </div>
+                <div className="grid grid-cols-3 gap-4 h-32">
+                  {getFeaturedProjects().map((project, i) => (
+                    <div
+                      key={project.id}
+                      className="bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group/project hover:scale-105"
+                    >
+                      <div className="w-full h-8 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-2 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
+                      <div>
+                        <div
+                          className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          {project.name}
+                        </div>
+                        <div
+                          className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          {project.tech.slice(0, 2).join(", ")}
                         </div>
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="absolute bottom-4 right-6">
-                    <button
-                      className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:underline"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      View All Projects →
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expanded Content */}
-                <div
-                  className={`absolute inset-6 transition-all duration-500 ${
-                    isWidgetExpanded("projects")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
-                >
-                  <div className="space-y-4">
-                    <h3
-                      className="text-xl font-medium mb-4"
-                      style={{
-                        color: "rgb(216, 207, 188)",
-                        fontFamily: "Playfair Display, serif",
-                      }}
-                    >
-                      All Projects
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {allProjects.map((project) => (
-                        <div
-                          key={project.id}
-                          className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors duration-300"
-                        >
-                          <div className="w-full h-16 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-3"></div>
-                          <h4
-                            className="text-sm font-medium mb-2"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            {project.name}
-                          </h4>
-                          <p
-                            className="text-xs opacity-70 mb-3 leading-relaxed"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            {project.description.slice(0, 80)}...
-                          </p>
-                          <div className="flex flex-wrap gap-1 mb-3">
-                            {project.tech.slice(0, 3).map((tech) => (
-                              <span
-                                key={tech}
-                                className="text-xs px-2 py-1 bg-white/10 rounded"
-                                style={{ color: "rgb(216, 207, 188)" }}
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                          <button
-                            className="w-full py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-xs font-medium rounded hover:from-amber-500/40 hover:to-amber-600/40 transition-all duration-300"
-                            style={{ color: "rgb(216, 207, 188)" }}
-                          >
-                            Visit Project →
-                          </button>
-                        </div>
-                      ))}
                     </div>
-                  </div>
+                  ))}
                 </div>
 
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("projects") && (
+                <div className="absolute bottom-4 right-6">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+                    className="text-xs opacity-60 group-hover:opacity-100 transition-all duration-300 hover:underline"
+                    style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    View All Projects →
                   </button>
-                )}
+                </div>
               </div>
 
-              {/* ==================== CONTACT SECTION WITH EXPANSION ==================== */}
+              {/* ==================== CONTACT SECTION ==================== */}
               <div
-                ref={(el) => {
-                  if (el && isWidgetExpanded("contact")) {
-                    const { transform, zIndex } = getExpansionTransform(
-                      "contact",
-                      el,
-                    );
-                    el.style.transform = transform;
-                    el.style.zIndex = zIndex.toString();
-                  }
-                }}
-                className={`col-span-12 md:col-span-4 rounded-2xl p-6 relative overflow-hidden cursor-pointer transition-all duration-500 ${
+                ref={(el) => (widgetRefs.current["contact"] = el)}
+                className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden cursor-pointer transition-all duration-300 ${
                   isWidgetExpanded("contact")
-                    ? "shadow-2xl !blur-0"
+                    ? "opacity-50"
                     : "hover:scale-105 hover:shadow-2xl hover:-translate-y-2"
-                }`}
-                style={{
-                  backgroundColor: "rgb(25, 26, 20)",
-                  height: isWidgetExpanded("contact") ? "450px" : "240px",
-                  zIndex: isWidgetExpanded("contact") ? 200 : 10,
-                }}
+                } group`}
+                style={{ backgroundColor: "rgb(25, 26, 20)" }}
                 onMouseEnter={() => handleWidgetInteraction("contact", "hover")}
                 onMouseLeave={() => handleWidgetInteraction("contact", "leave")}
                 onClick={() => handleWidgetInteraction("contact", "click")}
               >
                 <svg
-                  className="absolute top-4 right-4 w-6 h-6 opacity-20 transition-opacity duration-300"
+                  className="absolute top-4 right-4 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="none"
                   stroke="currentColor"
                   style={{ color: "rgb(216, 207, 188)" }}
@@ -1623,140 +1394,115 @@ const Index = () => {
                   />
                 </svg>
 
-                {/* Base Content */}
-                <div
-                  className={`flex flex-col justify-center h-full transition-all duration-500 ${
-                    isWidgetExpanded("contact")
-                      ? "opacity-0 pointer-events-none"
-                      : "opacity-100"
-                  }`}
+                <h3
+                  className="text-xl font-light mb-4"
+                  style={{
+                    color: "rgb(216, 207, 188)",
+                    fontFamily: "Playfair Display, serif",
+                  }}
                 >
-                  <h3
-                    className="text-xl font-light mb-4"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Let's Connect
-                  </h3>
+                  Let's Connect
+                </h3>
 
-                  <div className="space-y-4">
-                    <a
-                      href="#"
-                      className="block text-sm opacity-80 hover:opacity-100 transition-all duration-300 hover:translate-x-2 group/email"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <span className="group-hover/email:underline">
-                        hello@johndoe.dev
-                      </span>
-                    </a>
-                    <div className="flex space-x-6">
-                      {[
-                        { name: "Twitter", icon: "🐦" },
-                        { name: "GitHub", icon: "💻" },
-                        { name: "LinkedIn", icon: "💼" },
-                      ].map((social) => (
-                        <a
-                          key={social.name}
-                          href="#"
-                          className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:scale-110 hover:-translate-y-1 flex items-center space-x-1"
-                          style={{ color: "rgb(216, 207, 188)" }}
-                        >
-                          <span>{social.icon}</span>
-                          <span>{social.name}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div
-                    className="mt-4 text-xs opacity-50 transition-opacity duration-300"
+                <div className="space-y-4">
+                  <a
+                    href="#"
+                    className="block text-sm opacity-80 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-2 group/email"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    Usually responds within 24h
+                    <span className="group-hover/email:underline">
+                      hello@johndoe.dev
+                    </span>
+                  </a>
+                  <div className="flex space-x-6">
+                    {[
+                      { name: "Twitter", icon: "🐦" },
+                      { name: "GitHub", icon: "💻" },
+                      { name: "LinkedIn", icon: "💼" },
+                    ].map((social) => (
+                      <a
+                        key={social.name}
+                        href="#"
+                        className="text-xs opacity-60 group-hover:opacity-100 transition-all duration-300 hover:scale-110 hover:-translate-y-1 flex items-center space-x-1"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        <span>{social.icon}</span>
+                        <span>{social.name}</span>
+                      </a>
+                    ))}
                   </div>
                 </div>
 
-                {/* Expanded Content */}
                 <div
-                  className={`absolute inset-6 transition-all duration-500 ${
-                    isWidgetExpanded("contact")
-                      ? "opacity-100 pointer-events-auto"
-                      : "opacity-0 pointer-events-none"
-                  } overflow-y-auto custom-scrollbar`}
+                  className="mt-4 text-xs opacity-50 group-hover:opacity-70 transition-opacity duration-300"
+                  style={{ color: "rgb(216, 207, 188)" }}
                 >
-                  <h3
-                    className="text-xl font-medium mb-4"
-                    style={{
-                      color: "rgb(216, 207, 188)",
-                      fontFamily: "Playfair Display, serif",
-                    }}
-                  >
-                    Get In Touch
-                  </h3>
-                  <ContactForm />
-
-                  <div className="mt-6 pt-4 border-t border-white/10">
-                    <h4
-                      className="text-sm font-medium mb-3"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      Other ways to reach me
-                    </h4>
-                    <div
-                      className="space-y-2 text-xs"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <div className="flex items-center opacity-80">
-                        <span className="mr-3">📧</span>
-                        hello@johndoe.dev
-                      </div>
-                      <div className="flex items-center opacity-80">
-                        <span className="mr-3">📱</span>
-                        +1 (555) 123-4567
-                      </div>
-                      <div className="flex items-center opacity-80">
-                        <span className="mr-3">💼</span>
-                        linkedin.com/in/johndoe
-                      </div>
-                      <div className="flex items-center opacity-80">
-                        <span className="mr-3">🐙</span>
-                        github.com/johndoe
-                      </div>
-                    </div>
-                  </div>
+                  Usually responds within 24h
                 </div>
-
-                {/* Close button for expanded state */}
-                {isWidgetExpanded("contact") && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedWidget(null);
-                      setClickedWidget(null);
-                    }}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      style={{ color: "rgb(216, 207, 188)" }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* ==================== OVERLAY POPUP ==================== */}
+        {expandedWidget && widgetPosition && (
+          <div
+            className="fixed z-60 rounded-2xl p-8 shadow-2xl transition-all duration-500 overflow-y-auto"
+            style={{
+              backgroundColor:
+                expandedWidget === "hero"
+                  ? "rgb(86, 84, 73)"
+                  : expandedWidget === "profile"
+                    ? "rgb(45, 46, 40)"
+                    : expandedWidget === "about"
+                      ? "rgb(35, 36, 30)"
+                      : expandedWidget === "skills"
+                        ? "rgb(55, 56, 50)"
+                        : expandedWidget === "location"
+                          ? "rgb(65, 66, 60)"
+                          : expandedWidget === "projects"
+                            ? "rgb(75, 76, 70)"
+                            : expandedWidget === "contact"
+                              ? "rgb(25, 26, 20)"
+                              : "rgb(45, 46, 40)",
+              top: widgetPosition.top,
+              left: widgetPosition.left,
+              width: Math.max(widgetPosition.width, 400),
+              height: Math.max(widgetPosition.height + 200, 500),
+              maxHeight: "80vh",
+              maxWidth: "600px",
+              border: "1px solid rgba(216, 207, 188, 0.2)",
+              ...getOverlayTransform(),
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setExpandedWidget(null);
+                setClickedWidget(null);
+                setWidgetPosition(null);
+              }}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 transition-colors duration-200 flex items-center justify-center z-10"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                style={{ color: "rgb(216, 207, 188)" }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Expanded Content */}
+            {renderExpandedContent(expandedWidget)}
+          </div>
+        )}
       </div>
 
       {/* ==================== CUSTOM STYLES ==================== */}
