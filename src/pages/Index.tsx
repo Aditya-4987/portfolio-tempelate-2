@@ -1072,7 +1072,7 @@ export default function Index() {
                     <span style={textStyle}>Music Production</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-lg">��</span>
+                    <span className="text-lg">🥾</span>
                     <span style={textStyle}>Hiking</span>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -2182,10 +2182,21 @@ export default function Index() {
                 ))}
               </div>
 
-              <div
-                className="absolute top-4 right-4 w-6 h-6 border-2 rounded-full animate-pulse"
-                style={{ borderColor: theme.colors.primary }}
-              ></div>
+              {/* Directional arrow with hover animation */}
+              <div className="absolute top-4 right-4">
+                <div
+                  className="w-6 h-6 flex items-center justify-center transition-all duration-300 group-hover:animate-bounce"
+                  style={{ color: theme.colors.primary }}
+                >
+                  <svg
+                    className="w-4 h-4 transform rotate-45"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M7 17l9.2-9.2M17 17V7H7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Contact Widget */}
