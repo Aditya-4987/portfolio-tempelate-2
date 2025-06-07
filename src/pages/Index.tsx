@@ -1,11 +1,172 @@
 import { useEffect, useState } from "react";
 
+/**
+ * Enhanced Bentolio Portfolio Website
+ * Features expandable widgets with detailed content on hover
+ * Clean, elegant design with smooth animations
+ */
+
+// Types for better code organization
+interface Skill {
+  name: string;
+  level: number;
+  description: string;
+  category: string;
+}
+
+interface Project {
+  id: number;
+  name: string;
+  description: string;
+  tech: string[];
+  image: string;
+  liveUrl: string;
+  featured: boolean;
+}
+
 const Index = () => {
+  // ==================== STATE MANAGEMENT ====================
   const [progress, setProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showMain, setShowMain] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
+  // Widget expansion states
+  const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // ==================== DATA STRUCTURES ====================
+
+  // Skills data with detailed information
+  const allSkills: Skill[] = [
+    {
+      name: "React",
+      level: 95,
+      description: "Advanced component architecture and hooks",
+      category: "Frontend",
+    },
+    {
+      name: "Next.js",
+      level: 90,
+      description: "Full-stack development with SSR/SSG",
+      category: "Framework",
+    },
+    {
+      name: "TypeScript",
+      level: 88,
+      description: "Type-safe development and complex types",
+      category: "Language",
+    },
+    {
+      name: "Tailwind CSS",
+      level: 92,
+      description: "Utility-first CSS framework mastery",
+      category: "Styling",
+    },
+    {
+      name: "Framer Motion",
+      level: 85,
+      description: "Advanced animations and interactions",
+      category: "Animation",
+    },
+    {
+      name: "Node.js",
+      level: 83,
+      description: "Backend development and API design",
+      category: "Backend",
+    },
+    {
+      name: "GraphQL",
+      level: 80,
+      description: "Query language and API development",
+      category: "Backend",
+    },
+    {
+      name: "Docker",
+      level: 75,
+      description: "Containerization and deployment",
+      category: "DevOps",
+    },
+    {
+      name: "AWS",
+      level: 78,
+      description: "Cloud services and infrastructure",
+      category: "Cloud",
+    },
+    {
+      name: "Figma",
+      level: 90,
+      description: "UI/UX design and prototyping",
+      category: "Design",
+    },
+  ];
+
+  // Projects data with comprehensive details
+  const allProjects: Project[] = [
+    {
+      id: 1,
+      name: "E-commerce Platform",
+      description:
+        "Full-stack e-commerce solution with payment integration, inventory management, and admin dashboard.",
+      tech: ["React", "Node.js", "PostgreSQL", "Stripe"],
+      image: "/api/placeholder/300/200",
+      liveUrl: "https://ecommerce-demo.com",
+      featured: true,
+    },
+    {
+      id: 2,
+      name: "Design System",
+      description:
+        "Comprehensive design system with reusable components, documentation, and design tokens.",
+      tech: ["React", "Storybook", "Figma", "TypeScript"],
+      image: "/api/placeholder/300/200",
+      liveUrl: "https://design-system-demo.com",
+      featured: true,
+    },
+    {
+      id: 3,
+      name: "Mobile App",
+      description:
+        "Cross-platform mobile application for fitness tracking with real-time data sync.",
+      tech: ["React Native", "Firebase", "Redux"],
+      image: "/api/placeholder/300/200",
+      liveUrl: "https://fitness-app-demo.com",
+      featured: true,
+    },
+    {
+      id: 4,
+      name: "Analytics Dashboard",
+      description:
+        "Real-time analytics dashboard with interactive charts and data visualization.",
+      tech: ["React", "D3.js", "Python", "FastAPI"],
+      image: "/api/placeholder/300/200",
+      liveUrl: "https://analytics-demo.com",
+      featured: false,
+    },
+    {
+      id: 5,
+      name: "Social Media Platform",
+      description:
+        "Social networking platform with real-time messaging and content sharing.",
+      tech: ["Next.js", "Socket.io", "MongoDB", "Redis"],
+      image: "/api/placeholder/300/200",
+      liveUrl: "https://social-demo.com",
+      featured: false,
+    },
+    {
+      id: 6,
+      name: "AI Chat Assistant",
+      description:
+        "Intelligent chat assistant powered by machine learning for customer support.",
+      tech: ["Python", "TensorFlow", "React", "WebSocket"],
+      image: "/api/placeholder/300/200",
+      liveUrl: "https://ai-chat-demo.com",
+      featured: false,
+    },
+  ];
+
+  // ==================== EFFECTS ====================
+
+  // Loading progress simulation
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress((prev) => {
@@ -24,23 +185,105 @@ const Index = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Cleanup timer on unmount
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+    return () => {
+      if (hoverTimer) clearTimeout(hoverTimer);
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [hoverTimer]);
 
-  // Helper function for card hover effects
+  // ==================== HELPER FUNCTIONS ====================
+
+  // Handle widget hover with delay
+  const handleWidgetHover = (widgetName: string, isEntering: boolean) => {
+    if (hoverTimer) clearTimeout(hoverTimer);
+
+    if (isEntering) {
+      const timer = setTimeout(() => {
+        setExpandedWidget(widgetName);
+      }, 1500); // 1.5 second delay
+      setHoverTimer(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setExpandedWidget(null);
+      }, 300); // Small delay before hiding
+      setHoverTimer(timer);
+    }
+  };
+
+  // Get visible skills (first 5 with fade effect)
+  const getVisibleSkills = () => {
+    const skills = allSkills.slice(0, 5);
+    return skills.map((skill, index) => ({
+      ...skill,
+      opacity: index === 4 ? 0.3 : 1, // Fade effect on last skill
+    }));
+  };
+
+  // Get featured projects
+  const getFeaturedProjects = () =>
+    allProjects.filter((project) => project.featured);
+
+  // CSS Classes for consistency
   const cardHoverClass =
     "transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:-translate-y-2 cursor-pointer group";
-  const buttonHoverClass =
-    "relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg transform hover:-translate-y-1";
+
+  // ==================== RENDER METHODS ====================
+
+  // Contact Form Component
+  const ContactForm = () => (
+    <div className="space-y-4 mt-4">
+      <div>
+        <label
+          className="block text-xs font-medium mb-2 opacity-80"
+          style={{ color: "rgb(216, 207, 188)" }}
+        >
+          Name
+        </label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-sm focus:outline-none focus:border-white/40 transition-colors"
+          style={{ color: "rgb(216, 207, 188)" }}
+          placeholder="Your name"
+        />
+      </div>
+      <div>
+        <label
+          className="block text-xs font-medium mb-2 opacity-80"
+          style={{ color: "rgb(216, 207, 188)" }}
+        >
+          Email
+        </label>
+        <input
+          type="email"
+          className="w-full px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-sm focus:outline-none focus:border-white/40 transition-colors"
+          style={{ color: "rgb(216, 207, 188)" }}
+          placeholder="your@email.com"
+        />
+      </div>
+      <div>
+        <label
+          className="block text-xs font-medium mb-2 opacity-80"
+          style={{ color: "rgb(216, 207, 188)" }}
+        >
+          Message
+        </label>
+        <textarea
+          rows={3}
+          className="w-full px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-sm focus:outline-none focus:border-white/40 transition-colors resize-none"
+          style={{ color: "rgb(216, 207, 188)" }}
+          placeholder="Your message..."
+        />
+      </div>
+      <button className="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-medium rounded-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-300">
+        Send Message
+      </button>
+    </div>
+  );
 
   return (
     <>
-      {/* Google Fonts */}
+      {/* Google Fonts Import */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"
@@ -59,29 +302,7 @@ const Index = () => {
           fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
-        {/* Floating Background Elements */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <div
-            className="absolute w-96 h-96 rounded-full opacity-5 animate-pulse"
-            style={{
-              backgroundColor: "rgb(216, 207, 188)",
-              left: `${mousePosition.x * 0.02}%`,
-              top: `${mousePosition.y * 0.02}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          />
-          <div
-            className="absolute w-64 h-64 rounded-full opacity-10"
-            style={{
-              backgroundColor: "rgb(86, 84, 73)",
-              right: `${mousePosition.x * 0.01}%`,
-              bottom: `${mousePosition.y * 0.01}%`,
-              transform: "translate(50%, 50%)",
-            }}
-          />
-        </div>
-
-        {/* Animated Progress Bar */}
+        {/* ==================== PROGRESS BAR ==================== */}
         <div
           className="fixed top-0 left-0 h-1 z-50 transition-all duration-500 ease-out shadow-lg"
           style={{
@@ -91,7 +312,7 @@ const Index = () => {
           }}
         />
 
-        {/* Loading Screen */}
+        {/* ==================== LOADING SCREEN ==================== */}
         <div
           className={`fixed inset-0 z-40 transition-all duration-1000 ${
             showMain ? "opacity-0 pointer-events-none" : "opacity-100"
@@ -105,6 +326,7 @@ const Index = () => {
               <div className="col-span-8 row-span-9 grid grid-cols-8 grid-rows-9 gap-[14px]">
                 <div className="col-span-5 row-span-5" />
 
+                {/* Loading Avatar */}
                 <div className="col-span-3 row-span-5 flex items-center justify-center">
                   <div
                     className={`w-full max-w-[420px] aspect-[400/450] rounded-2xl flex items-center justify-center p-[21px] transition-all duration-1000 ${
@@ -130,7 +352,6 @@ const Index = () => {
                           </svg>
                         </div>
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent rounded-xl" />
                     </div>
                   </div>
                 </div>
@@ -146,6 +367,7 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Loading Text */}
           {!isLoaded && (
             <div className="fixed inset-0 flex items-center justify-center z-50">
               <div className="text-center">
@@ -183,14 +405,14 @@ const Index = () => {
           )}
         </div>
 
-        {/* Main Portfolio Content */}
+        {/* ==================== MAIN PORTFOLIO CONTENT ==================== */}
         <div
           className={`w-full p-[14px] min-h-screen transition-all duration-1000 ${
             showMain ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           <div className="grid grid-cols-12 gap-[14px] min-h-screen relative z-10">
-            {/* Header Section */}
+            {/* ==================== HEADER SECTION ==================== */}
             <div className="col-span-12 h-20 flex items-center justify-between px-6 backdrop-blur-sm">
               <div
                 className="text-3xl font-light tracking-wide relative group"
@@ -202,11 +424,13 @@ const Index = () => {
                 BENTOLIO
                 <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></div>
               </div>
+
+              {/* Navigation */}
               <div className="flex space-x-8">
                 {["ABOUT", "WORK", "CONTACT"].map((item) => (
                   <button
                     key={item}
-                    className={`text-sm tracking-wider font-medium ${buttonHoverClass} group`}
+                    className="text-sm tracking-wider font-medium relative overflow-hidden transition-all duration-300 hover:scale-105 group"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
                     <span className="relative z-10">{item}</span>
@@ -216,9 +440,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Main Content Grid */}
+            {/* ==================== MAIN CONTENT GRID ==================== */}
             <div className="col-span-12 grid grid-cols-12 gap-[14px] pb-[14px]">
-              {/* Hero Section */}
+              {/* ==================== HERO SECTION ==================== */}
               <div
                 className={`col-span-12 md:col-span-8 h-80 rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(86, 84, 73)" }}
@@ -253,7 +477,7 @@ const Index = () => {
                   development
                 </p>
 
-                {/* Floating Graphics */}
+                {/* Floating Star Icon */}
                 <svg
                   className="absolute top-1/2 right-8 w-6 h-6 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
@@ -263,16 +487,11 @@ const Index = () => {
                 </svg>
               </div>
 
-              {/* Profile Card */}
+              {/* ==================== PROFILE CARD ==================== */}
               <div
                 className={`col-span-12 md:col-span-4 h-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(45, 46, 40)" }}
               >
-                {/* Decorative Background Pattern */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
-                </div>
-
                 <div className="w-24 h-24 bg-gradient-to-br from-amber-200 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-xl">
                   <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center">
                     <svg
@@ -312,12 +531,17 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* About Section */}
+              {/* ==================== EXPANDABLE ABOUT SECTION ==================== */}
               <div
-                className={`col-span-12 md:col-span-6 h-60 rounded-2xl p-6 relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(35, 36, 30)" }}
+                className={`col-span-12 md:col-span-6 rounded-2xl p-6 relative overflow-hidden transition-all duration-500 ${cardHoverClass}`}
+                style={{
+                  backgroundColor: "rgb(35, 36, 30)",
+                  height: expandedWidget === "about" ? "400px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetHover("about", true)}
+                onMouseLeave={() => handleWidgetHover("about", false)}
               >
-                {/* Decorative Quote Mark */}
+                {/* Quote Mark Decoration */}
                 <svg
                   className="absolute top-4 right-4 w-8 h-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"
                   fill="currentColor"
@@ -335,21 +559,73 @@ const Index = () => {
                 >
                   About Me
                 </h3>
+
+                {/* Basic Content */}
                 <p
                   className="text-sm leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-300"
                   style={{ color: "rgb(216, 207, 188)" }}
                 >
                   I'm a passionate creative developer with over 5 years of
-                  experience in crafting digital experiences. I specialize in
-                  React, Next.js, and modern web technologies, bringing ideas to
-                  life through clean code and beautiful design.
+                  experience in crafting digital experiences.
                 </p>
+
+                {/* Expanded Content */}
+                <div
+                  className={`transition-all duration-500 ${expandedWidget === "about" ? "opacity-100 max-h-96" : "opacity-0 max-h-0"} overflow-hidden`}
+                >
+                  <div className="mt-4 space-y-4">
+                    <div className="border-l-2 border-amber-500/30 pl-4">
+                      <h4
+                        className="text-sm font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Experience Timeline
+                      </h4>
+                      <div
+                        className="space-y-2 text-xs"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        <div className="opacity-80">
+                          2023-Present: Senior Frontend Developer at TechCorp
+                        </div>
+                        <div className="opacity-80">
+                          2021-2023: Full Stack Developer at StartupXYZ
+                        </div>
+                        <div className="opacity-80">
+                          2019-2021: Frontend Developer at DesignStudio
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-l-2 border-amber-500/30 pl-4">
+                      <h4
+                        className="text-sm font-medium mb-2"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        Philosophy
+                      </h4>
+                      <p
+                        className="text-xs opacity-80 leading-relaxed"
+                        style={{ color: "rgb(216, 207, 188)" }}
+                      >
+                        I believe in creating intuitive, accessible, and
+                        performant web experiences that solve real problems and
+                        delight users.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Skills Section */}
+              {/* ==================== EXPANDABLE SKILLS SECTION ==================== */}
               <div
-                className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(55, 56, 50)" }}
+                className={`col-span-12 md:col-span-3 rounded-2xl p-6 relative overflow-hidden transition-all duration-500 ${cardHoverClass}`}
+                style={{
+                  backgroundColor: "rgb(55, 56, 50)",
+                  height: expandedWidget === "skills" ? "400px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetHover("skills", true)}
+                onMouseLeave={() => handleWidgetHover("skills", false)}
               >
                 <h3
                   className="text-xl font-light mb-4"
@@ -360,51 +636,86 @@ const Index = () => {
                 >
                   Skills
                 </h3>
-                <div className="space-y-3">
-                  {[
-                    "React",
-                    "Next.js",
-                    "TypeScript",
-                    "Tailwind CSS",
-                    "Framer Motion",
-                  ].map((skill, index) => (
+
+                {/* Basic Skills View (5 skills with fade) */}
+                <div
+                  className={`space-y-3 transition-all duration-500 ${expandedWidget === "skills" ? "opacity-0 max-h-0" : "opacity-100 max-h-40"} overflow-hidden`}
+                >
+                  {getVisibleSkills().map((skill, index) => (
                     <div
-                      key={skill}
-                      className="flex items-center text-sm opacity-80 group-hover:opacity-100 transition-all duration-300 hover:translate-x-2"
+                      key={skill.name}
+                      className="flex items-center text-sm transition-all duration-300 hover:translate-x-2"
                       style={{
                         color: "rgb(216, 207, 188)",
-                        animationDelay: `${index * 0.1}s`,
+                        opacity: skill.opacity,
                       }}
                     >
                       <div className="w-2 h-2 rounded-full mr-3 bg-current opacity-60"></div>
-                      {skill}
+                      {skill.name}
                     </div>
                   ))}
-                </div>
-
-                {/* Progress Bars */}
-                <div className="absolute bottom-4 left-6 right-6">
+                  {/* Fade indicator */}
                   <div
-                    className="text-xs opacity-60 mb-2"
+                    className="text-xs opacity-40 text-center mt-4"
                     style={{ color: "rgb(216, 207, 188)" }}
                   >
-                    Proficiency
+                    Hover to see more...
                   </div>
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full group-hover:animate-pulse"
-                      style={{ width: "92%" }}
-                    ></div>
+                </div>
+
+                {/* Expanded Skills View */}
+                <div
+                  className={`transition-all duration-500 ${expandedWidget === "skills" ? "opacity-100 max-h-96" : "opacity-0 max-h-0"} overflow-hidden`}
+                >
+                  <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
+                    {allSkills.map((skill) => (
+                      <div
+                        key={skill.name}
+                        className="border-l-2 border-amber-500/20 pl-3 pb-2"
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span
+                            className="text-sm font-medium"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {skill.name}
+                          </span>
+                          <span
+                            className="text-xs opacity-60"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {skill.level}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1 bg-white/10 rounded-full mb-1">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-1000"
+                            style={{ width: `${skill.level}%` }}
+                          ></div>
+                        </div>
+                        <div
+                          className="text-xs opacity-70"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          {skill.description}
+                        </div>
+                        <div
+                          className="text-xs opacity-50 mt-1"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          {skill.category}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Location */}
+              {/* ==================== LOCATION CARD ==================== */}
               <div
                 className={`col-span-12 md:col-span-3 h-60 rounded-2xl p-6 flex flex-col justify-center text-center relative overflow-hidden ${cardHoverClass}`}
                 style={{ backgroundColor: "rgb(65, 66, 60)" }}
               >
-                {/* Floating Animation */}
                 <div className="text-5xl mb-4 group-hover:animate-bounce transition-all duration-300">
                   🌍
                 </div>
@@ -423,8 +734,6 @@ const Index = () => {
                 >
                   San Francisco, CA
                 </p>
-
-                {/* Time Zone */}
                 <div
                   className="mt-3 text-xs opacity-60 group-hover:opacity-80 transition-opacity duration-300"
                   style={{ color: "rgb(216, 207, 188)" }}
@@ -437,10 +746,15 @@ const Index = () => {
                 <div className="absolute bottom-2 left-2 w-2 h-2 rounded-full bg-white/10"></div>
               </div>
 
-              {/* Projects Preview */}
+              {/* ==================== EXPANDABLE PROJECTS SECTION ==================== */}
               <div
-                className={`col-span-12 md:col-span-8 h-60 rounded-2xl p-6 relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(75, 76, 70)" }}
+                className={`col-span-12 md:col-span-8 rounded-2xl p-6 relative overflow-hidden transition-all duration-500 ${cardHoverClass}`}
+                style={{
+                  backgroundColor: "rgb(75, 76, 70)",
+                  height: expandedWidget === "projects" ? "500px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetHover("projects", true)}
+                onMouseLeave={() => handleWidgetHover("projects", false)}
               >
                 <h3
                   className="text-2xl font-light mb-4"
@@ -451,50 +765,98 @@ const Index = () => {
                 >
                   Recent Work
                 </h3>
-                <div className="grid grid-cols-3 gap-4 h-32">
-                  {[
-                    { name: "E-commerce Platform", tech: "React & Node.js" },
-                    { name: "Design System", tech: "Figma & Storybook" },
-                    { name: "Mobile App", tech: "React Native" },
-                  ].map((project, i) => (
-                    <div
-                      key={i}
-                      className="bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group/project hover:scale-105"
-                    >
-                      <div className="w-full h-8 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-2 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
-                      <div>
-                        <div
-                          className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
+
+                {/* Basic Projects View */}
+                <div
+                  className={`transition-all duration-500 ${expandedWidget === "projects" ? "opacity-0 max-h-0" : "opacity-100 max-h-40"} overflow-hidden`}
+                >
+                  <div className="grid grid-cols-3 gap-4 h-32">
+                    {getFeaturedProjects().map((project, i) => (
+                      <div
+                        key={project.id}
+                        className="bg-white/10 rounded-lg hover:bg-white/20 transition-all duration-300 cursor-pointer p-4 flex flex-col justify-between group/project hover:scale-105"
+                      >
+                        <div className="w-full h-8 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-2 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
+                        <div>
+                          <div
+                            className="text-xs font-medium opacity-80 group-hover/project:opacity-100 transition-opacity duration-300"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {project.name}
+                          </div>
+                          <div
+                            className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
+                            style={{ color: "rgb(216, 207, 188)" }}
+                          >
+                            {project.tech.slice(0, 2).join(", ")}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div
+                    className="text-xs opacity-40 text-center mt-4"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    Hover to explore all projects...
+                  </div>
+                </div>
+
+                {/* Expanded Projects View */}
+                <div
+                  className={`transition-all duration-500 ${expandedWidget === "projects" ? "opacity-100 max-h-96" : "opacity-0 max-h-0"} overflow-hidden`}
+                >
+                  <div className="grid grid-cols-2 gap-4 max-h-80 overflow-y-auto custom-scrollbar">
+                    {allProjects.map((project) => (
+                      <div
+                        key={project.id}
+                        className="bg-white/10 rounded-lg p-4 hover:bg-white/20 transition-all duration-300 cursor-pointer group/project"
+                      >
+                        <div className="w-full h-20 bg-gradient-to-r from-amber-400/20 to-amber-600/20 rounded mb-3 group-hover/project:from-amber-400/40 group-hover/project:to-amber-600/40 transition-all duration-300"></div>
+                        <h4
+                          className="text-sm font-medium mb-2 group-hover/project:text-amber-300 transition-colors duration-300"
                           style={{ color: "rgb(216, 207, 188)" }}
                         >
                           {project.name}
-                        </div>
-                        <div
-                          className="text-xs opacity-60 group-hover/project:opacity-80 transition-opacity duration-300"
+                        </h4>
+                        <p
+                          className="text-xs opacity-70 mb-3 leading-relaxed"
                           style={{ color: "rgb(216, 207, 188)" }}
                         >
-                          {project.tech}
+                          {project.description}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {project.tech.map((tech) => (
+                            <span
+                              key={tech}
+                              className="text-xs px-2 py-1 bg-white/10 rounded"
+                              style={{ color: "rgb(216, 207, 188)" }}
+                            >
+                              {tech}
+                            </span>
+                          ))}
                         </div>
+                        <button
+                          className="w-full py-2 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-xs font-medium rounded hover:from-amber-500/40 hover:to-amber-600/40 transition-all duration-300"
+                          style={{ color: "rgb(216, 207, 188)" }}
+                        >
+                          Visit Project →
+                        </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* See More Button */}
-                <div className="absolute bottom-4 right-6">
-                  <button
-                    className="text-xs opacity-60 hover:opacity-100 transition-all duration-300 hover:underline"
-                    style={{ color: "rgb(216, 207, 188)" }}
-                  >
-                    View All Projects →
-                  </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Contact */}
+              {/* ==================== EXPANDABLE CONTACT SECTION ==================== */}
               <div
-                className={`col-span-12 md:col-span-4 h-60 rounded-2xl p-6 flex flex-col justify-center relative overflow-hidden ${cardHoverClass}`}
-                style={{ backgroundColor: "rgb(25, 26, 20)" }}
+                className={`col-span-12 md:col-span-4 rounded-2xl p-6 relative overflow-hidden transition-all duration-500 ${cardHoverClass}`}
+                style={{
+                  backgroundColor: "rgb(25, 26, 20)",
+                  height: expandedWidget === "contact" ? "500px" : "240px",
+                }}
+                onMouseEnter={() => handleWidgetHover("contact", true)}
+                onMouseLeave={() => handleWidgetHover("contact", false)}
               >
                 {/* Email Icon */}
                 <svg
@@ -520,7 +882,11 @@ const Index = () => {
                 >
                   Let's Connect
                 </h3>
-                <div className="space-y-4">
+
+                {/* Basic Contact View */}
+                <div
+                  className={`space-y-4 transition-all duration-500 ${expandedWidget === "contact" ? "opacity-0 max-h-0" : "opacity-100 max-h-40"} overflow-hidden`}
+                >
                   <a
                     href="#"
                     className="block text-sm opacity-80 hover:opacity-100 transition-all duration-300 hover:translate-x-2 group/email"
@@ -547,14 +913,52 @@ const Index = () => {
                       </a>
                     ))}
                   </div>
+                  <div
+                    className="mt-4 text-xs opacity-50"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    Usually responds within 24h
+                  </div>
+                  <div
+                    className="text-xs opacity-40 text-center mt-4"
+                    style={{ color: "rgb(216, 207, 188)" }}
+                  >
+                    Hover for contact form...
+                  </div>
                 </div>
 
-                {/* Response Time */}
+                {/* Expanded Contact View with Form */}
                 <div
-                  className="mt-4 text-xs opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-                  style={{ color: "rgb(216, 207, 188)" }}
+                  className={`transition-all duration-500 ${expandedWidget === "contact" ? "opacity-100 max-h-96" : "opacity-0 max-h-0"} overflow-hidden`}
                 >
-                  Usually responds within 24h
+                  <ContactForm />
+
+                  {/* Alternative Contact Methods */}
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <h4
+                      className="text-sm font-medium mb-3"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      Other ways to reach me
+                    </h4>
+                    <div
+                      className="space-y-2 text-xs"
+                      style={{ color: "rgb(216, 207, 188)" }}
+                    >
+                      <div className="flex items-center opacity-80">
+                        <span className="mr-2">📧</span>
+                        hello@johndoe.dev
+                      </div>
+                      <div className="flex items-center opacity-80">
+                        <span className="mr-2">📱</span>
+                        +1 (555) 123-4567
+                      </div>
+                      <div className="flex items-center opacity-80">
+                        <span className="mr-2">💼</span>
+                        LinkedIn: /in/johndoe
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -562,7 +966,25 @@ const Index = () => {
         </div>
       </div>
 
+      {/* ==================== CUSTOM STYLES ==================== */}
       <style jsx>{`
+        /* Custom scrollbar for expanded sections */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 2px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(216, 207, 188, 0.3);
+          border-radius: 2px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(216, 207, 188, 0.5);
+        }
+
+        /* Animation keyframes */
         @keyframes float {
           0%,
           100% {
