@@ -1959,23 +1959,8 @@ const Index = () => {
           <div
             className="fixed z-60 rounded-2xl p-8 shadow-2xl transition-all duration-500 overflow-y-auto"
             style={{
-              // Dynamic background based on widget type
-              backgroundColor:
-                expandedWidget === "hero"
-                  ? theme.colors.hero
-                  : expandedWidget === "profile"
-                    ? theme.colors.profile
-                    : expandedWidget === "about"
-                      ? theme.colors.about
-                      : expandedWidget === "skills"
-                        ? theme.colors.skills
-                        : expandedWidget === "location"
-                          ? theme.colors.location
-                          : expandedWidget === "projects"
-                            ? theme.colors.projects
-                            : expandedWidget === "contact"
-                              ? theme.colors.contact
-                              : theme.colors.profile,
+              // Dynamic background based on widget type (memoized)
+              backgroundColor: widgetBackgroundColor,
               border: `1px solid ${theme.colors.primary}20`,
               // Apply memoized smart growth calculations
               ...expansionStyle,
