@@ -2117,18 +2117,24 @@ export default function Index() {
                 Available for remote work worldwide
               </p>
 
-              {/* Directional arrow with hover animation */}
+              {/* Simple arrow pointing to top-right with oscillating animation */}
               <div className="absolute top-4 right-4">
                 <div
-                  className="w-6 h-6 flex items-center justify-center transition-all duration-300 group-hover:animate-bounce"
+                  className="w-6 h-6 flex items-center justify-center transition-all duration-300 group-hover:animate-pulse"
                   style={{ color: theme.colors.primary }}
                 >
                   <svg
-                    className="w-4 h-4 transform rotate-45"
-                    fill="currentColor"
+                    className="w-4 h-4 group-hover:animate-[oscillate_1s_ease-in-out_infinite]"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <path d="M7 17l9.2-9.2M17 17V7H7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M7 17L17 7M17 7H10M17 7v7"
+                    />
                   </svg>
                 </div>
               </div>
